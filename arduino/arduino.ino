@@ -1,126 +1,104 @@
 /*
-  Waste segregation controller
+  Waste segregation controller (LED version)
 
-  The Python brain sends one text command per line over USB serial (9600 baud):
+  No servos yet: each bin gets one LED. When the Python brain sends a SORT
+  command, the matching LED lights up for a couple of seconds.
+
+  Serial, 9600 baud, one command per line:
 
     PING            -> PONG
-    ITEM            -> ITEM:1 (item present) or ITEM:0   (needs the ultrasonic sensor)
-    SORT:BIO        -> OK   (biodegradable bin)
-    SORT:NONBIO     -> OK   (non-biodegradable bin)
-    SORT:RESIDUAL   -> OK   (residual / special waste bin)
+    TEST            -> blinks every LED once, then OK
+    OFF             -> all LEDs off, OK
+    SORT:BIO        -> green LED on,  OK   (biodegradable)
+    SORT:NONBIO     -> blue LED on,   OK   (non-biodegradable)
+    SORT:RESIDUAL   -> red LED on,    OK   (residual / special waste)
 
-  Errors: ERR:BAD_CMD, ERR:NO_ITEM, ERR:TOO_LONG
+  Errors: ERR:BAD_CMD, ERR:TOO_LONG
 
-  Hardware (see README for wiring):
-    - Sorter servo: swings the chute to the right bin
-    - Gate servo:   opens a trapdoor to drop the item
-    - HC-SR04 (optional): detects that an item is waiting
+  Wiring (one per LED):
+    Arduino pin -> 220 ohm resistor -> LED long leg (+), short leg (-) -> GND
 */
 
-#include <Servo.h>
-
 // ---------- Pins ----------
-const uint8_t PIN_SORT_SERVO = 9;
-const uint8_t PIN_GATE_SERVO = 10;
-const uint8_t PIN_TRIG = 7;
-const uint8_t PIN_ECHO = 8;
+const uint8_t PIN_BIO      = 2;   // green
+const uint8_t PIN_NONBIO   = 3;   // blue
+const uint8_t PIN_RESIDUAL = 4;   // red
 
-// ---------- Calibrate these for your build ----------
-const int ANGLE_BIO      = 30;
-const int ANGLE_NONBIO   = 90;
-const int ANGLE_RESIDUAL = 150;
-const int GATE_CLOSED    = 0;
-const int GATE_OPEN      = 90;
+const uint8_t LEDS[] = {PIN_BIO, PIN_NONBIO, PIN_RESIDUAL};
+const uint8_t NUM_LEDS = sizeof(LEDS) / sizeof(LEDS[0]);
 
-const unsigned long MOVE_MS = 700;   // time for the sorter servo to reach the bin
-const unsigned long DROP_MS = 900;   // how long the gate stays open
-
-// Set to true if an HC-SR04 is wired up
-const bool USE_SENSOR = false;
-const int ITEM_MAX_CM = 15;          // item counts as present if closer than this
+const unsigned long LIGHT_MS = 2000;  // how long a LED stays on after SORT
 
 // ---------- State ----------
-Servo sorter;
-Servo gate;
 char buf[32];
 uint8_t len = 0;
+int activePin = -1;
+unsigned long offAt = 0;
 
 // ---------- Helpers ----------
-long readDistanceCm() {
-  digitalWrite(PIN_TRIG, LOW);
-  delayMicroseconds(2);
-  digitalWrite(PIN_TRIG, HIGH);
-  delayMicroseconds(10);
-  digitalWrite(PIN_TRIG, LOW);
-  unsigned long us = pulseIn(PIN_ECHO, HIGH, 30000UL);  // 30 ms timeout
-  if (us == 0) return -1;                                // nothing in range
-  return us / 58;
+void allOff() {
+  for (uint8_t i = 0; i < NUM_LEDS; i++) {
+    digitalWrite(LEDS[i], LOW);
+  }
+  activePin = -1;
 }
 
-bool itemPresent() {
-  long d = readDistanceCm();
-  return d > 0 && d < ITEM_MAX_CM;
+void lightOnly(uint8_t pin) {
+  allOff();
+  digitalWrite(pin, HIGH);
+  activePin = pin;
+  offAt = millis() + LIGHT_MS;
 }
 
-void sortTo(int angle) {
-  sorter.write(angle);
-  delay(MOVE_MS);
-  gate.write(GATE_OPEN);
-  delay(DROP_MS);
-  gate.write(GATE_CLOSED);
-  delay(MOVE_MS / 2);
+void selfTest() {
+  allOff();
+  for (uint8_t i = 0; i < NUM_LEDS; i++) {
+    digitalWrite(LEDS[i], HIGH);
+    delay(250);
+    digitalWrite(LEDS[i], LOW);
+  }
 }
 
 void handleCommand(const char *cmd) {
   if (strcmp(cmd, "PING") == 0) {
     Serial.println("PONG");
-    return;
-  }
-
-  if (strcmp(cmd, "ITEM") == 0) {
-    if (USE_SENSOR) {
-      Serial.println(itemPresent() ? "ITEM:1" : "ITEM:0");
-    } else {
-      Serial.println("ITEM:1");  // no sensor, assume an item is there
-    }
-    return;
-  }
-
-  int angle = -1;
-  if (strcmp(cmd, "SORT:BIO") == 0)           angle = ANGLE_BIO;
-  else if (strcmp(cmd, "SORT:NONBIO") == 0)   angle = ANGLE_NONBIO;
-  else if (strcmp(cmd, "SORT:RESIDUAL") == 0) angle = ANGLE_RESIDUAL;
-
-  if (angle < 0) {
+  } else if (strcmp(cmd, "TEST") == 0) {
+    selfTest();
+    Serial.println("OK");
+  } else if (strcmp(cmd, "OFF") == 0) {
+    allOff();
+    Serial.println("OK");
+  } else if (strcmp(cmd, "SORT:BIO") == 0) {
+    lightOnly(PIN_BIO);
+    Serial.println("OK");
+  } else if (strcmp(cmd, "SORT:NONBIO") == 0) {
+    lightOnly(PIN_NONBIO);
+    Serial.println("OK");
+  } else if (strcmp(cmd, "SORT:RESIDUAL") == 0) {
+    lightOnly(PIN_RESIDUAL);
+    Serial.println("OK");
+  } else {
     Serial.println("ERR:BAD_CMD");
-    return;
   }
-
-  if (USE_SENSOR && !itemPresent()) {
-    Serial.println("ERR:NO_ITEM");
-    return;
-  }
-
-  sortTo(angle);
-  Serial.println("OK");
 }
 
 // ---------- Arduino entry points ----------
 void setup() {
   Serial.begin(9600);
-  pinMode(PIN_TRIG, OUTPUT);
-  pinMode(PIN_ECHO, INPUT);
-
-  sorter.attach(PIN_SORT_SERVO);
-  gate.attach(PIN_GATE_SERVO);
-  gate.write(GATE_CLOSED);
-  sorter.write(ANGLE_NONBIO);  // start in the middle
-  delay(500);
-
+  for (uint8_t i = 0; i < NUM_LEDS; i++) {
+    pinMode(LEDS[i], OUTPUT);
+  }
+  allOff();
+  selfTest();          // quick power-on check
   Serial.println("READY");
 }
 
 void loop() {
+  // turn the active LED off after LIGHT_MS (no blocking delay)
+  if (activePin >= 0 && (long)(millis() - offAt) >= 0) {
+    allOff();
+  }
+
   while (Serial.available()) {
     char c = Serial.read();
     if (c == '\n' || c == '\r') {
