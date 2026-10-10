@@ -1,7 +1,7 @@
 import cv2
 from ultralytics import YOLO
 
-model = YOLO("runs/classify/runs/waste/experiment-3/weights/best.pt")
+model = YOLO("runs/classify/runs/waste/experiment-5/weights/best.pt")
 cap = cv2.VideoCapture(0)  # 0 = default webcam; try 1 if it doesn't open
 
 if not cap.isOpened():
