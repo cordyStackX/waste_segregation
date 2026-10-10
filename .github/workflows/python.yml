@@ -1,0 +1,28 @@
+name: Python brain
+
+on:
+  push:
+    branches: [main]
+    paths: ["**.py", "requirements*.txt", ".github/workflows/python.yml"]
+  pull_request:
+    paths: ["**.py", "requirements*.txt", ".github/workflows/python.yml"]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install ruff
+        run: pip install ruff
+
+      # Only real bugs: syntax errors and undefined names. Loosen or tighten later.
+      - name: Lint (errors only)
+        run: ruff check . --select E9,F63,F7,F82 --exclude .venv,dataset,runs,flutter,arduino
+
+      - name: Byte-compile all scripts
+        run: python -m compileall -q build_dataset.py main.py test.py camera.py iframe_embeded.py

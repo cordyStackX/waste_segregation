@@ -1,0 +1,45 @@
+name: Flutter app
+
+on:
+  push:
+    branches: [main]
+    paths: ["flutter/**", ".github/workflows/flutter.yml"]
+  pull_request:
+    paths: ["flutter/**", ".github/workflows/flutter.yml"]
+
+defaults:
+  run:
+    working-directory: flutter   # folder that contains pubspec.yaml
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - run: flutter pub get
+
+      - name: Analyze
+        run: flutter analyze
+
+      - name: Test
+        if: hashFiles('flutter/test/**') != ''
+        run: flutter test
+
+      - name: Build APK
+        run: flutter build apk --release
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: waste-app-apk
+          path: flutter/build/app/outputs/flutter-apk/app-release.apk

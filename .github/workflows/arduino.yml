@@ -1,0 +1,25 @@
+name: Arduino controller
+
+on:
+  push:
+    branches: [main]
+    paths: ["arduino/**", ".github/workflows/arduino.yml"]
+  pull_request:
+    paths: ["arduino/**", ".github/workflows/arduino.yml"]
+
+jobs:
+  compile:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: arduino/compile-sketches@v1
+        with:
+          # Change to your board, e.g. arduino:avr:mega or esp32:esp32:esp32
+          fqbn: arduino:avr:uno
+          # Folder that contains the .ino file (name must match the sketch folder)
+          sketch-paths: |
+            - arduino
+          # Add third-party libraries here if the sketch needs any, e.g.
+          # libraries: |
+          #   - name: Servo
