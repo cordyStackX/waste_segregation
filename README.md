@@ -175,6 +175,25 @@ Default settings (see `main.py`): `yolo11n-cls.pt`, 50 epochs with `patience=20`
 
 The model is saved to `runs/waste/groups/weights/best.pt` (the script uses an absolute `project` path, because Ultralytics prepends `runs/classify/` to a relative one). Older runs under `runs/classify/` can be deleted.
 
+### Try object detection
+
+The existing `main.py` and camera server use image classification. To train a detector that draws a box around each waste item, annotate the images manually first:
+
+```bash
+python annotate.py
+```
+
+In the annotation window, drag a box around each item. Press `1`, `2`, or `3` to choose the box class (`biodegradable`, `non_biodegradable`, or `residual_special_waste`); `u` undoes the last box, `c` clears the image, `s` saves, `n` skips, `p` goes back, and `q` quits. Save an empty image with `s` when it contains no target item. Annotation text files are written under `annotations/` and use YOLO's normalized box format.
+
+After labeling the images you want to use, prepare and train the detection dataset:
+
+```bash
+python prepare_detection_dataset.py
+python train_detection.py
+```
+
+The detector weights are saved under `runs/detect/waste/weights/best.pt`. This is a separate training path; the current `camera.py` and `iframe_embeded.py` expect a classification model and need detection-specific prediction handling before they can display boxes.
+
 ### Reading the training results
 
 - **`top1_acc`** is the share of validation images the model got right.

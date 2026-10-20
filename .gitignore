@@ -1,3 +1,5 @@
 dataset/
 runs/
 *.pt
+annotations/
+detection_dataset/

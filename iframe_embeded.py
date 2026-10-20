@@ -3,7 +3,7 @@ from flask import Flask, Response, jsonify
 from flask_cors import CORS          # pip install flask flask-cors
 from ultralytics import YOLO
 
-MODEL = "runs/classify/runs/waste/experiment-3/weights/best.pt"
+MODEL = "runs/classify/runs/waste/experiment/weights/best.pt"
 BIN = {"organic": "biodegradable", "plastic": "non-biodegradable", "cans": "non-biodegradable"}
 
 app = Flask(__name__)
