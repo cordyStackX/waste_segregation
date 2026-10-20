@@ -177,13 +177,14 @@ The model is saved to `runs/waste/groups/weights/best.pt` (the script uses an ab
 
 ### Try object detection
 
-The existing `main.py` and camera server use image classification. To train a detector that draws a box around each waste item, annotate the images manually first:
+The existing `main.py` and camera server use image classification. To train a detector that draws a box around each waste item and predicts detailed item classes, migrate the existing broad bin annotations, then review them:
 
 ```bash
+python migrate_annotations.py
 python annotate.py
 ```
 
-In the annotation window, drag a box around each item. Press `1`, `2`, or `3` to choose the box class (`biodegradable`, `non_biodegradable`, or `residual_special_waste`); `u` undoes the last box, `c` clears the image, `s` saves, `n` skips, `p` goes back, and `q` quits. Save an empty image with `s` when it contains no target item. Annotation text files are written under `annotations/` and use YOLO's normalized box format.
+The migration preserves box coordinates and infers detailed classes from folder names. Review the boxes and correct any class that does not match the image. In the annotation window, drag a box around each item. Press `1` organic, `2` plastic, `3` plastic bottle, `4` cans, `5` glass, `6` paper, `7` other non-biodegradable, or `8` residual/special waste. `u` undoes the last box, `c` clears the image, `s` saves, `n` skips, `p` goes back, and `q` quits. Detailed labels are saved separately under `annotations_detailed/`; the original annotations remain under `annotations/`.
 
 After labeling the images you want to use, prepare and train the detection dataset:
 
@@ -192,7 +193,7 @@ python prepare_detection_dataset.py
 python train_detection.py
 ```
 
-The detector weights are saved under `runs/detect/waste/weights/best.pt`. This is a separate training path; the current `camera.py` and `iframe_embeded.py` expect a classification model and need detection-specific prediction handling before they can display boxes.
+The detector weights are saved under `runs/detect/waste_detailed/weights/best.pt`. Detailed classes map to the three physical bins in `detection_classes.py`. `iframe_embeded.py` loads this detector, draws boxes, and returns all detections from `/api/result`. The existing `camera.py` remains on the classification model.
 
 ### Reading the training results
 

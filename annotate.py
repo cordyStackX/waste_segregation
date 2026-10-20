@@ -3,12 +3,12 @@
 from pathlib import Path
 
 import cv2
+from detection_classes import CLASSES, class_id_for_image
 
 
 SOURCE = Path("public")
-ANNOTATIONS = Path("annotations")
+ANNOTATIONS = Path("annotations_detailed")
 IMAGE_EXTENSIONS = {".jpg", ".jpeg", ".png", ".webp", ".avif"}
-CLASSES = ["biodegradable", "non_biodegradable", "residual_special_waste"]
 WINDOW = "Waste image annotator"
 MAX_WIDTH = 1200
 MAX_HEIGHT = 800
@@ -47,7 +47,7 @@ def mouse(event, x, y, _flags, _param):
 
 
 def load_image(path):
-    global boxes, display_image, scale, image_width, image_height
+    global boxes, display_image, scale, image_width, image_height, selected_class
     original = cv2.imread(str(path))
     if original is None:
         print(f"Cannot read image: {path}")
@@ -55,6 +55,7 @@ def load_image(path):
     image_height, image_width = original.shape[:2]
     scale = min(MAX_WIDTH / image_width, MAX_HEIGHT / image_height, 1.0)
     display_image = cv2.resize(original, (round(image_width * scale), round(image_height * scale)))
+    selected_class = class_id_for_image(path, SOURCE)
     labels = label_path(path)
     boxes = []
     if labels.exists():
@@ -95,6 +96,8 @@ def render(path):
     selected = CLASSES[selected_class]
     status = f"{index + 1}/{len(images)}  {path.relative_to(SOURCE)}  |  class: {selected}  |  boxes: {len(boxes)}"
     cv2.putText(canvas, status[:140], (10, 22), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 1)
+    legend = "1 organic  2 plastic  3 plastic_bottle  4 cans  5 glass  6 paper  7 other_nonbio  8 residual"
+    cv2.putText(canvas, legend, (10, canvas.shape[0] - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.45, (255, 255, 255), 1)
     cv2.imshow(WINDOW, canvas)
 
 
@@ -108,7 +111,7 @@ while index < len(images):
     while True:
         render(current)
         key = cv2.waitKey(20) & 0xFF
-        if key in (ord("1"), ord("2"), ord("3")):
+        if ord("1") <= key <= ord("8"):
             selected_class = key - ord("1")
         elif key == ord("u") and boxes:
             boxes.pop()

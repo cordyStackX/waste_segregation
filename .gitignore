@@ -1,5 +1,7 @@
 dataset/
 runs/
 *.pt
+__pycache__/
 annotations/
+annotations_detailed/
 detection_dataset/

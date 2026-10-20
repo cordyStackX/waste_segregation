@@ -1,6 +1,7 @@
 """Train the waste object detector after preparing detection_dataset/."""
 
 from ultralytics import YOLO
+from pathlib import Path
 
 
 def main():
@@ -12,8 +13,8 @@ def main():
         batch=8,
         workers=2,
         device=0,
-        project="runs/detect",
-        name="waste",
+        project=str(Path("runs/detect").resolve()),
+        name="waste_detailed",
     )
 
 

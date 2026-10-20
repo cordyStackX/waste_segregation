@@ -4,8 +4,10 @@ import random
 import shutil
 from pathlib import Path
 
+from detection_classes import CLASSES
+
 SOURCE = Path("public")
-ANNOTATIONS = Path("annotations")
+ANNOTATIONS = Path("annotations_detailed")
 DESTINATION = Path("detection_dataset")
 IMAGE_EXTENSIONS = {".jpg", ".jpeg", ".png", ".webp", ".avif"}
 VAL_RATIO = 0.2
@@ -42,9 +44,7 @@ yaml.write_text(
     "train: images/train\n"
     "val: images/val\n\n"
     "names:\n"
-    "  0: biodegradable\n"
-    "  1: non_biodegradable\n"
-    "  2: residual_special_waste\n"
+    + "".join(f"  {index}: {name}\n" for index, name in enumerate(CLASSES))
 )
 print(f"Prepared {len(splits['train'])} train and {len(splits['val'])} validation images in {DESTINATION}/")
 print(f"Dataset config: {yaml}")
