@@ -1,4 +1,4 @@
-<p align="center">
+ <p align="center">
   <img src="https://raw.githubusercontent.com/cordyStackX/waste_segregation/refs/heads/main/public/bin_bandit_logo.png" alt="Bin-Bandit logo" width="320">
 </p>
 
@@ -12,12 +12,18 @@
 
 ## About
 
-Bin-Bandit is a waste-identifying system that scans the waste presented to it and guides it into the right bin.
+Bin-Bandit is a waste-identifying system that scans waste and guides users in identifying the correct waste category for proper segregation.
 
-## Waste categories
+## Waste Management System Flow Infographic
 
-| Bin | Category |
-|-----|----------|
-| Green | Biodegradable |
-| Blue | Non-biodegradable |
-| Red | Residual / Special waste |
+<p align="center">
+  <img src="https://raw.githubusercontent.com/cordyStackX/waste_segregation/refs/heads/main/public/Waste%20Management%20System%20Flow%20Infographic.png" alt="Bin-Bandit Waste Management System Flow Infographic" width="900">
+</p>
+
+## Waste Categories
+
+| Bin Color | Category |
+|---|---|
+| 🟢 Green | Biodegradable |
+| 🔵 Blue | Non-biodegradable |
+| 🔴 Red | Residual / Special Waste |
