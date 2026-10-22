@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="680" height="450" viewBox="0 0 680 450" role="img">
+  <title>Bin-Bandit logo</title>
+  <desc>A masked raccoon peeking out of a green waste bin with three colored category dots.</desc>
+
+  <!-- Background (delete for transparent) -->
+  <rect width="680" height="450" fill="#FFFFFF"/>
+
+  <!-- Badge -->
+  <circle cx="340" cy="190" r="150" fill="#E1F5EE" stroke="#0F6E56" stroke-width="4"/>
+  <circle cx="340" cy="190" r="136" fill="none" stroke="#0F6E56" stroke-width="1.5" stroke-dasharray="3 7"/>
+
+  <!-- Ears -->
+  <path d="M290 128 L282 82 L326 106 Z" fill="#888780" stroke="#2C2C2A" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M390 128 L398 82 L354 106 Z" fill="#888780" stroke="#2C2C2A" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M292 116 L289 95 L309 107 Z" fill="#2C2C2A"/>
+  <path d="M388 116 L391 95 L371 107 Z" fill="#2C2C2A"/>
+
+  <!-- Head and face -->
+  <ellipse cx="340" cy="150" rx="64" ry="50" fill="#B4B2A9" stroke="#2C2C2A" stroke-width="3"/>
+  <ellipse cx="340" cy="170" rx="40" ry="27" fill="#F1EFE8"/>
+
+  <!-- Bandit mask -->
+  <path d="M280 142 Q310 124 340 138 Q370 124 400 142 Q398 172 372 168 Q352 166 340 152 Q328 166 308 168 Q282 172 280 142 Z" fill="#2C2C2A"/>
+
+  <!-- Eyes (sideways glance) -->
+  <circle cx="314" cy="149" r="8" fill="#FFFFFF"/>
+  <circle cx="366" cy="149" r="8" fill="#FFFFFF"/>
+  <circle cx="318" cy="150" r="4" fill="#2C2C2A"/>
+  <circle cx="370" cy="150" r="4" fill="#2C2C2A"/>
+
+  <!-- Nose and mouth -->
+  <ellipse cx="340" cy="173" rx="8" ry="6" fill="#2C2C2A"/>
+  <path d="M328 183 Q340 192 352 183" fill="none" stroke="#2C2C2A" stroke-width="2.5" stroke-linecap="round"/>
+
+  <!-- Bin body -->
+  <path d="M272 214 L408 214 L396 298 L284 298 Z" fill="#1D9E75" stroke="#04342C" stroke-width="3" stroke-linejoin="round"/>
+  <line x1="296" y1="224" x2="299" y2="290" stroke="#5DCAA5" stroke-width="3" stroke-linecap="round"/>
+  <line x1="384" y1="224" x2="381" y2="290" stroke="#5DCAA5" stroke-width="3" stroke-linecap="round"/>
+
+  <!-- Bin rim -->
+  <rect x="262" y="198" width="156" height="18" rx="5" fill="#0F6E56" stroke="#04342C" stroke-width="3"/>
+
+  <!-- Category label: biodegradable / non-biodegradable / residual special -->
+  <rect x="304" y="236" width="72" height="34" rx="6" fill="#F1EFE8" stroke="#04342C" stroke-width="2"/>
+  <circle cx="322" cy="253" r="7" fill="#639922"/>
+  <circle cx="340" cy="253" r="7" fill="#378ADD"/>
+  <circle cx="358" cy="253" r="7" fill="#E24B4A"/>
+
+  <!-- Paws on the rim -->
+  <ellipse cx="294" cy="202" rx="16" ry="11" fill="#888780" stroke="#2C2C2A" stroke-width="3"/>
+  <ellipse cx="386" cy="202" rx="16" ry="11" fill="#888780" stroke="#2C2C2A" stroke-width="3"/>
+  <g stroke="#2C2C2A" stroke-width="2" stroke-linecap="round">
+    <line x1="288" y1="197" x2="288" y2="203"/>
+    <line x1="294" y1="196" x2="294" y2="203"/>
+    <line x1="300" y1="197" x2="300" y2="203"/>
+    <line x1="380" y1="197" x2="380" y2="203"/>
+    <line x1="386" y1="196" x2="386" y2="203"/>
+    <line x1="392" y1="197" x2="392" y2="203"/>
+  </g>
+
+  <!-- Wordmark -->
+  <text x="340" y="392" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="46" font-weight="bold" letter-spacing="1" fill="#2C2C2A">Bin<tspan fill="#1D9E75">-Bandit</tspan></text>
+  <text x="340" y="422" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="14" letter-spacing="3" fill="#5F5E5A">RAID THE RIGHT BIN</text>
+</svg>
