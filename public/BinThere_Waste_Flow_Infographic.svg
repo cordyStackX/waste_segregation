@@ -1,0 +1,223 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1536 1024" font-family="'Segoe UI','Helvetica Neue',Arial,sans-serif" xmlns:c2pa="http://c2pa.org/manifest"><metadata><c2pa:manifest>AAAWgmp1bWIAAAAeanVtZGMycGEAEQAQgAAAqgA4m3EDYzJwYQAAABZcanVtYgAAAEdqdW1kYzJtYQARABCAAACqADibcQN1cm46YzJwYTo5MTczYjVlZC1lZGNjLTRhZGItOTE1Zi1mZDMyMTZkODA4YWQAAAADl2p1bWIAAAApanVtZGMyYXMAEQAQgAAAqgA4m3EDYzJwYS5hc3NlcnRpb25zAAAAALxqdW1iAAAARGp1bWRjYm9yABEAEIAAAKoAOJtxE2MycGEuaW5ncmVkaWVudC52MwAAAAAYYzJzaHgwmRJEYARRE2ZPeWNRKTsAAABwY2JvcqNpZGM6Zm9ybWF0bWltYWdlL3N2Zyt4bWxqaW5zdGFuY2VJRHgseG1wOmlpZDowZTRmOTAwYy0xZTcyLTQ0OGUtYTdmYy0xMDJkZGFhZDExMGVscmVsYXRpb25zaGlwaHBhcmVudE9mAAAB4mp1bWIAAABBanVtZGNib3IAEQAQgAAAqgA4m3ETYzJwYS5hY3Rpb25zLnYyAAAAABhjMnNoZqS6oKuAhlZ++XK2h7Np1wAAAZljYm9yomdhY3Rpb25zgqJmYWN0aW9ua2MycGEub3BlbmVkanBhcmFtZXRlcnOha2luZ3JlZGllbnRzgaJjdXJseC1zZWxmI2p1bWJmPWMycGEuYXNzZXJ0aW9ucy9jMnBhLmluZ3JlZGllbnQudjNkaGFzaFgg5RljRIKBkjRyG1EJ5o56ldHeLsDRE5akgaT8cAO4SJakZmFjdGlvbngdY29tLmFudGhyb3BpYy5jbGF1ZGUucHJvdmlkZWRqcGFyYW1ldGVyc6F4H2NvbS5hbnRocm9waWMub3JpZ2luLWNvbmZpZGVuY2VndW5rbm93bmtkZXNjcmlwdGlvbnhmQ2xhdWRlIHByb3ZpZGVkIHRoaXMgZmlsZSBhdCB0aGUgcmVxdWVzdCBvZiBhIHVzZXIgYW5kIG1heSBoYXZlIGNyZWF0ZWQgb3IgbW9kaWZpZWQgdGhlIGZpbGUgY29udGVudHMubXNvZnR3YXJlQWdlbnShZG5hbWVmQ2xhdWRlcmFsbEFjdGlvbnNJbmNsdWRlZPUAAADIanVtYgAAAEBqdW1kY2JvcgARABCAAACqADibcRNjMnBhLmhhc2guZGF0YQAAAAAYYzJzaNjk4cD86bKPQe970FKvmxcAAACAY2JvcqVjYWxnZnNoYTI1NmNwYWRNAAAAAAAAAAAAAAAAAGRoYXNoWCDleHBLXvYh2u5R7Qv2zeQEcmZ3aU310U25UnedSfVNl2RuYW1lbmp1bWJmIG1hbmlmZXN0amV4Y2x1c2lvbnOBomVzdGFydBi6Zmxlbmd0aBkeBAAAAj5qdW1iAAAAJ2p1bWRjMmNsABEAEIAAAKoAOJtxA2MycGEuY2xhaW0udjIAAAACD2Nib3KlY2FsZ2ZzaGEyNTZpc2lnbmF0dXJleE1zZWxmI2p1bWJmPS9jMnBhL3VybjpjMnBhOjkxNzNiNWVkLWVkY2MtNGFkYi05MTVmLWZkMzIxNmQ4MDhhZC9jMnBhLnNpZ25hdHVyZWppbnN0YW5jZUlEeCx4bXA6aWlkOjQ1YjNmMjA4LWZkNjEtNDMzOC1iNWUyLWE0YjA3OTM2NWM0MnJjcmVhdGVkX2Fzc2VydGlvbnODomN1cmx4LXNlbGYjanVtYmY9YzJwYS5hc3NlcnRpb25zL2MycGEuaW5ncmVkaWVudC52M2RoYXNoWCDlGWNEgoGSNHIbUQnmjnqV0d4uwNETlqSBpPxwA7hIlqJjdXJseCpzZWxmI2p1bWJmPWMycGEuYXNzZXJ0aW9ucy9jMnBhLmFjdGlvbnMudjJkaGFzaFggfRr+hhqGGSFfnYfpIvA1n/QmNt25lZy9k/4Zbv3g7oiiY3VybHgpc2VsZiNqdW1iZj1jMnBhLmFzc2VydGlvbnMvYzJwYS5oYXNoLmRhdGFkaGFzaFgg3KQY1nGu4cL7c1i5jCjRtcwOqu0d6Q7R6RKspQ+wfEh0Y2xhaW1fZ2VuZXJhdG9yX2luZm+jZG5hbWVvQW50aHJvcGljIEZpbGVzZ3ZlcnNpb25lMS4wLjBrc3BlY1ZlcnNpb25lMi40LjAAABA4anVtYgAAAChqdW1kYzJjcwARABCAAACqADibcQNjMnBhLnNpZ25hdHVyZQAAABAIY2JvctKEWQISogEmGCFZAgowggIGMIIBjaADAgECAhRA5aAK7sI50L64g/oGQgU9Z1UTADAKBggqhkjOPQQDAzBJMRcwFQYDVQQKEw5BbnRocm9waWMsIFBCQzEuMCwGA1UEAxMlQW50aHJvcGljIENvbnRlbnQgQ3JlZGVudGlhbHMgUm9vdCBDQTAeFw0yNjA4MDcxODQzNTZaFw0yODA4MDYxOTQzNTZaMEQxFzAVBgNVBAoTDkFudGhyb3BpYywgUEJDMSkwJwYDVQQDEyBBbnRocm9waWMgQ2xhdWRlIENvbnRlbnQgU2lnbmluZzBZMBMGByqGSM49AgEGCCqGSM49AwEHA0IABJh6CmvLUBgFFNU0vUKlOVtE6djd17L5SuwX0LemFisBM3dkd/3cyjxFA3Qo5S46fX0/ihY0VZ7mfb9KF703t5OjWDBWMA4GA1UdDwEB/wQEAwIHgDAVBgNVHSUEDjAMBgorBgEEAYPoXgIBMAwGA1UdEwEB/wQCMAAwHwYDVR0jBBgwFoAUzlHiBIFOZFsj+OPEz5o+nMHXXMIwCgYIKoZIzj0EAwMDZwAwZAIwMXMdFJ4BetLLVY7ORuE9noqbbAZOZn/aArXyTwFAZfKrPzxF2vPoJNf1+UCdg1XGAjBwX1zd9WGqYkqmL5SFqw1QySjr1zJfpJM9+1rdDwSPLMOPOjKuiXjoU/pUUeG9RwmhY3BhZFkNngAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPZYQBkfxA0ex7ShCwS8hNfeIbFXUT/7cBUfdPAiKyOROWNXeZQSM8hg9CVXGAhnsUuokDaXv7pzcWY+erfDhLGFaN4=</c2pa:manifest></metadata>
+  <title>BinThere Waste Flow</title>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f6fcf8"/>
+      <stop offset="1" stop-color="#eef8f2"/>
+    </linearGradient>
+    <linearGradient id="proc" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#1f9d6b"/>
+      <stop offset="1" stop-color="#0f7a5a"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1536" height="1024" fill="url(#bg)"/>
+
+  <!-- Corner decoration -->
+  <path d="M0 0 H235 C215 60 155 80 112 130 C62 190 0 190 0 150 Z" fill="#c4eaa9"/>
+  <path d="M0 0 H150 C130 40 90 55 60 85 C30 110 0 110 0 100 Z" fill="#8fd694"/>
+  <path d="M1536 0 H1370 C1380 50 1430 60 1470 90 C1510 120 1536 130 1536 150 Z" fill="#2fa66a"/>
+  <path d="M205 75 C230 62 250 66 252 66 C250 90 232 108 206 108 C196 100 196 85 205 75 Z" fill="#6cc27a"/>
+  <path d="M1425 80 C1450 70 1475 76 1480 80 C1474 102 1452 120 1428 118 C1418 106 1418 92 1425 80 Z" fill="#1f9d6b"/>
+  <!-- recycle-style arrows -->
+  <g fill="none" stroke="#5cc79a" stroke-width="10" stroke-linecap="round" stroke-linejoin="round" transform="translate(1290,100)">
+    <path d="M10 40 A38 38 0 0 1 70 18"/><path d="M58 6 L72 18 L56 28"/>
+    <path d="M78 36 A38 38 0 0 1 56 84"/><path d="M68 88 L56 84 L58 70"/>
+    <path d="M40 90 A38 38 0 0 1 8 52"/><path d="M4 66 L8 52 L22 56"/>
+  </g>
+
+  <!-- Logo: icon + wordmark, aligned (icon spans cap-top to slogan-bottom) -->
+  <g id="logo">
+  <g transform="translate(484,48) scale(0.71)">
+    <g fill="none" stroke="#22b573" stroke-width="10" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M10 48 V10 H48"/><path d="M152 10 H190 V48"/><path d="M10 152 V190 H48"/><path d="M152 190 H190 V152"/>
+    </g>
+    <path d="M100 18 C117 20 121 38 110 46 C100 53 87 48 87 36 C87 28 92 21 100 18 Z" fill="#22c55e"/>
+    <path d="M93 44 C97 36 101 31 108 27" fill="none" stroke="#f0fdf4" stroke-width="3" stroke-linecap="round"/>
+    <rect x="88" y="60" width="24" height="10" rx="4" fill="#14532d"/>
+    <rect x="56" y="68" width="88" height="14" rx="7" fill="#14532d"/>
+    <path d="M66 86 H134 L127 152 Q126 160 118 160 H82 Q74 160 73 152 Z" fill="#14532d"/>
+    <rect x="82" y="100" width="9" height="46" rx="4.5" fill="#22c55e"/>
+    <rect x="97" y="100" width="9" height="46" rx="4.5" fill="#3b82f6"/>
+    <rect x="112" y="100" width="9" height="46" rx="4.5" fill="#f59e0b"/>
+  </g>
+  <text x="652" y="118" font-size="100" font-weight="800" textLength="400" lengthAdjust="spacingAndGlyphs">
+    <tspan fill="#0d5a3c">Bin</tspan><tspan fill="#22b573">There</tspan>
+  </text>
+  <rect x="652" y="138" width="400" height="52" rx="26" fill="#22a06b"/>
+  <text x="852" y="175" font-size="28" font-weight="600" fill="#fff" text-anchor="middle">Scan it. Bin there.</text>
+  </g>
+
+  <!-- ============ USER ============ -->
+  <rect x="24" y="250" width="300" height="500" rx="22" fill="#effaf4" stroke="#5cc79a" stroke-width="2"/>
+  <rect x="24" y="215" width="300" height="60" rx="22" fill="#1f9d6b"/>
+  <circle cx="108" cy="237" r="9" fill="#fff"/><path d="M92 262 a16 14 0 0 1 32 0 z" fill="#fff"/>
+  <text x="184" y="256" font-size="34" font-weight="700" fill="#fff" text-anchor="middle">User</text>
+
+  <!-- citizen -->
+  <circle cx="165" cy="300" r="17" fill="#f2c7a0"/>
+  <path d="M146 296 c0-22 38-22 38 0 c-4-8-34-8-38 0z" fill="#3a2a22"/>
+  <path d="M118 372 c0-38 18-50 46-50 s46 12 46 50z" fill="#1f9d6b"/>
+  <rect x="186" y="328" width="22" height="36" rx="5" fill="#2b2f36" transform="rotate(14 197 346)"/>
+  <text x="174" y="402" font-size="19" font-weight="600" fill="#14532d" text-anchor="middle">Citizen / Resident</text>
+  <!-- community -->
+  <g fill="#1f9d6b">
+    <circle cx="174" cy="432" r="11"/><path d="M155 462 a19 18 0 0 1 38 0z"/>
+    <circle cx="144" cy="440" r="9"/><path d="M129 462 a15 14 0 0 1 28 0z"/>
+    <circle cx="204" cy="440" r="9"/><path d="M191 462 a15 14 0 0 1 28 0z"/>
+  </g>
+  <text x="174" y="490" font-size="19" font-weight="600" fill="#14532d" text-anchor="middle">Community</text>
+  <text x="174" y="514" font-size="19" font-weight="600" fill="#14532d" text-anchor="middle">Member</text>
+  <!-- truck -->
+  <rect x="88" y="535" width="72" height="42" rx="4" fill="#1f9d6b"/>
+  <path d="M164 546 h26 l14 16 v15 h-40z" fill="#6cc27a"/>
+  <circle cx="114" cy="583" r="12" fill="#14532d"/><circle cx="114" cy="583" r="5" fill="#fff"/>
+  <circle cx="188" cy="583" r="12" fill="#14532d"/><circle cx="188" cy="583" r="5" fill="#fff"/>
+  <text x="174" y="621" font-size="19" font-weight="600" fill="#14532d" text-anchor="middle">Waste Collector /</text>
+  <text x="174" y="645" font-size="19" font-weight="600" fill="#14532d" text-anchor="middle">Staff</text>
+  <line x1="44" y1="668" x2="304" y2="668" stroke="#bfe3d0" stroke-width="2"/>
+  <g font-size="17" fill="#3a4a42" text-anchor="middle">
+    <text x="174" y="693">Uses the system through</text>
+    <text x="174" y="715">mobile app or web browser</text>
+    <text x="174" y="737">to manage waste.</text>
+  </g>
+
+  <!-- arrow -->
+  <path d="M332 468 L352 482 L332 496 Z" fill="#1f9d6b"/>
+
+  <!-- ============ INPUT ============ -->
+  <rect x="364" y="250" width="300" height="500" rx="22" fill="#effaf4" stroke="#5cc79a" stroke-width="2"/>
+  <rect x="364" y="215" width="300" height="60" rx="22" fill="#1f9d6b"/>
+  <text x="514" y="256" font-size="34" font-weight="700" fill="#fff" text-anchor="middle">Input</text>
+
+  <rect x="388" y="296" width="252" height="170" rx="18" fill="#f4fcf8" stroke="#8fd6b4" stroke-width="2"/>
+  <rect x="478" y="332" width="72" height="50" rx="8" fill="#2fa882"/>
+  <rect x="496" y="324" width="28" height="12" rx="3" fill="#2fa882"/>
+  <circle cx="514" cy="357" r="15" fill="#f4fcf8"/><circle cx="514" cy="357" r="9" fill="#2fa882"/>
+  <text x="514" y="414" font-size="22" font-weight="700" fill="#14532d" text-anchor="middle">Camera image</text>
+  <text x="514" y="442" font-size="18" fill="#3a4a42" text-anchor="middle">Photo of waste</text>
+
+  <rect x="388" y="492" width="252" height="230" rx="18" fill="#f4fcf8" stroke="#8fd6b4" stroke-width="2"/>
+  <rect x="492" y="520" width="44" height="76" rx="9" fill="#14532d"/>
+  <rect x="498" y="530" width="32" height="54" rx="3" fill="#8fe0b8"/>
+  <text x="514" y="636" font-size="22" font-weight="700" fill="#14532d" text-anchor="middle">Flutter app</text>
+  <text x="514" y="664" font-size="18" fill="#3a4a42" text-anchor="middle">Mobile + web</text>
+
+  <!-- arrow -->
+  <path d="M672 468 L692 482 L672 496 Z" fill="#1f9d6b"/>
+
+  <!-- ============ PROCESS ============ -->
+  <rect x="704" y="250" width="420" height="500" rx="22" fill="#effaf4" stroke="#5cc79a" stroke-width="2"/>
+  <rect x="704" y="215" width="420" height="60" rx="22" fill="#1f9d6b"/>
+  <text x="914" y="256" font-size="34" font-weight="700" fill="#fff" text-anchor="middle">Process</text>
+
+  <g fill="url(#proc)">
+    <rect x="724" y="290" width="380" height="88" rx="18"/>
+    <rect x="724" y="402" width="380" height="88" rx="18"/>
+    <rect x="724" y="514" width="380" height="88" rx="18"/>
+    <rect x="724" y="626" width="380" height="88" rx="18"/>
+  </g>
+  <g fill="#1f9d6b">
+    <path d="M904 380 h20 l-10 14z"/><path d="M904 492 h20 l-10 14z"/><path d="M904 604 h20 l-10 14z"/>
+  </g>
+  <g fill="#fff" font-size="24" font-weight="700">
+    <text x="800" y="342">Preprocess image</text>
+    <text x="800" y="446">YOLO11n-cls.pt</text>
+    <text x="800" y="558">Decision logic</text>
+    <text x="800" y="662">Sort command</text>
+  </g>
+  <g fill="#d8f5e6" font-size="19">
+    <text x="800" y="472">(Waste classification)</text>
+    <text x="800" y="584">(Determine waste type)</text>
+    <text x="800" y="688">Python → Arduino controller</text>
+  </g>
+  <!-- icons -->
+  <g fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="744" y="312" width="46" height="36" rx="5"/><path d="M748 342 l14-14 10 10 6-6 8 10"/><circle cx="756" cy="322" r="3" fill="#fff"/>
+    <!-- neural -->
+    <circle cx="767" cy="446" r="17"/><circle cx="755" cy="446" r="3" fill="#fff"/><circle cx="779" cy="446" r="3" fill="#fff"/><circle cx="767" cy="434" r="3" fill="#fff"/><path d="M755 446 L767 434 L779 446 M755 446 L779 446"/>
+    <!-- decision -->
+    <circle cx="767" cy="534" r="7"/><circle cx="748" cy="574" r="7"/><circle cx="786" cy="574" r="7"/><path d="M767 541 L750 568 M767 541 L784 568 M755 574 H779"/>
+    <!-- sort split -->
+    <path d="M744 668 H764 M764 668 L784 648 M764 668 H788 M764 668 L784 690"/><path d="M778 644 l8 4 -4 8 M782 686 l4 4 -8 4 M784 664 l6 4 -6 4"/>
+  </g>
+
+  <!-- arrow -->
+  <path d="M1132 468 L1152 482 L1132 496 Z" fill="#1f9d6b"/>
+
+  <!-- ============ OUTPUT / SEGREGATE ============ -->
+  <rect x="1164" y="250" width="348" height="500" rx="22" fill="#f1f6f5" stroke="#9db8b4" stroke-width="2"/>
+  <rect x="1164" y="215" width="348" height="60" rx="22" fill="#7f9c9a"/>
+  <text x="1338" y="256" font-size="34" font-weight="700" fill="#fff" text-anchor="middle">Segregate</text>
+
+  <!-- bio -->
+  <rect x="1184" y="294" width="308" height="130" rx="18" fill="#fff" stroke="#9fd8b4" stroke-width="2"/>
+  <path d="M1222 392 C1204 370 1214 332 1252 318 C1262 346 1252 380 1222 392 Z" fill="#22a06b"/>
+  <path d="M1222 392 C1228 366 1238 348 1250 330" fill="none" stroke="#e8fff1" stroke-width="3" stroke-linecap="round"/>
+  <text x="1282" y="352" font-size="22" font-weight="700" fill="#14532d">Biodegradable</text>
+  <text x="1282" y="380" font-size="18" fill="#3a4a42">(Organic waste)</text>
+  <!-- non-bio -->
+  <rect x="1184" y="444" width="308" height="130" rx="18" fill="#fff" stroke="#a9c8ee" stroke-width="2"/>
+  <rect x="1206" y="466" width="46" height="8" rx="3" fill="#2f6fd0"/><rect x="1222" y="458" width="14" height="8" rx="2" fill="#2f6fd0"/>
+  <path d="M1210 478 h38 l-4 54 h-30z" fill="#2f6fd0"/>
+  <path d="M1222 488 v36 M1236 488 v36" stroke="#fff" stroke-width="3"/>
+  <text x="1282" y="500" font-size="22" font-weight="700" fill="#14325a">Non-biodegradable</text>
+  <text x="1282" y="526" font-size="17" fill="#3a4a42">(Cans, glass, paper,</text>
+  <text x="1282" y="548" font-size="17" fill="#3a4a42">plastic, plastic bottles)</text>
+  <!-- residual -->
+  <rect x="1184" y="594" width="308" height="130" rx="18" fill="#fff" stroke="#f1d29a" stroke-width="2"/>
+  <path d="M1220 622 h24 l-4 12 c20 10 28 34 20 54 h-56 c-8-20 0-44 20-54z" fill="#e0901a"/>
+  <rect x="1222" y="620" width="20" height="6" rx="3" fill="#b96f0a"/>
+  <path d="M1232 650 v18 M1232 676 v2" stroke="#fff" stroke-width="5" stroke-linecap="round"/>
+  <text x="1282" y="650" font-size="21" font-weight="700" fill="#5a3b06">Residual special waste</text>
+  <text x="1282" y="678" font-size="18" fill="#3a4a42">(Hazardous / Special)</text>
+
+  <!-- ============ STEPS ============ -->
+  <g font-size="24" font-weight="700">
+    <polygon points="24,788 322,788 346,826 322,864 24,864" fill="#8fd9ae"/>
+    <polygon points="321,788 619,788 643,826 619,864 321,864 345,826" fill="#a6e3bf"/>
+    <polygon points="618,788 916,788 940,826 916,864 618,864 642,826" fill="#7dd8e0"/>
+    <polygon points="915,788 1213,788 1237,826 1213,864 915,864 939,826" fill="#6ab0ee"/>
+    <polygon points="1212,788 1512,788 1512,864 1212,864 1236,826" fill="#b3c4c6"/>
+
+    <circle cx="66" cy="826" r="22" fill="#14532d"/><text x="66" y="835" font-size="24" fill="#fff" text-anchor="middle">1</text>
+    <text x="150" y="835" fill="#14532d">User Input</text>
+    <circle cx="386" cy="826" r="22" fill="#14532d"/><text x="386" y="835" font-size="24" fill="#fff" text-anchor="middle">2</text>
+    <text x="460" y="835" fill="#14532d">Image Processing</text>
+    <circle cx="684" cy="826" r="22" fill="#0b4f6a"/><text x="684" y="835" font-size="24" fill="#fff" text-anchor="middle">3</text>
+    <text x="760" y="835" fill="#0b4f6a">Classification</text>
+    <circle cx="982" cy="826" r="22" fill="#1b3f9a"/><text x="982" y="835" font-size="24" fill="#fff" text-anchor="middle">4</text>
+    <text x="1050" y="835" font-size="22" fill="#14306e">Decision &amp; Sorting</text>
+    <circle cx="1278" cy="826" r="22" fill="#2f3b3d"/><text x="1278" y="835" font-size="24" fill="#fff" text-anchor="middle">5</text>
+    <text x="1352" y="835" fill="#2f3b3d">Segregate</text>
+  </g>
+
+  <g fill="#f4fcf8" stroke-width="2">
+    <rect x="24" y="866" width="285" height="110" rx="16" stroke="#8fd6b4"/>
+    <rect x="321" y="866" width="285" height="110" rx="16" stroke="#8fd6b4"/>
+    <rect x="618" y="866" width="285" height="110" rx="16" fill="#f0fbfd" stroke="#7dd8e0"/>
+    <rect x="915" y="866" width="285" height="110" rx="16" fill="#f0f6fe" stroke="#6ab0ee"/>
+    <rect x="1212" y="866" width="300" height="110" rx="16" fill="#f4f7f7" stroke="#b3c4c6"/>
+  </g>
+  <g font-size="18" fill="#2f4a3f">
+    <text x="42" y="900">User captures or uploads</text>
+    <text x="42" y="924">an image via the mobile app</text>
+    <text x="42" y="948">or web application.</text>
+
+    <text x="339" y="900">The system preprocesses</text>
+    <text x="339" y="924">the image for analysis.</text>
+
+    <text x="636" y="900" fill="#12525f">YOLO11n-cls.pt identifies</text>
+    <text x="636" y="924" fill="#12525f">the waste type using</text>
+    <text x="636" y="948" fill="#12525f">AI/ML.</text>
+
+    <text x="933" y="900" fill="#14306e">The system applies decision</text>
+    <text x="933" y="924" fill="#14306e">logic and sends the sort</text>
+    <text x="933" y="948" fill="#14306e">command to the controller.</text>
+
+    <text x="1230" y="896" fill="#2f3b3d">The waste is sorted into</text>
+    <text x="1230" y="917" fill="#2f3b3d">biodegradable,</text>
+    <text x="1230" y="938" fill="#2f3b3d">non-biodegradable, or</text>
+    <text x="1230" y="959" fill="#2f3b3d">residual special waste.</text>
+  </g>
+</svg>
