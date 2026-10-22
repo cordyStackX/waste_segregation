@@ -17,7 +17,7 @@ Bin-Bandit is a waste-identifying system that scans waste and guides users in id
 ## Waste Management System Flow Infographic
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/cordyStackX/waste_segregation/refs/heads/main/public/Waste%20Management%20System%20Flow%20Infographic.png" alt="Bin-Bandit Waste Management System Flow Infographic" width="900">
+  <img src="https://raw.githubusercontent.com/cordyStackX/waste_segregation/refs/heads/main/public/Bin-Bandit%20Waste%20Flow%20Infographic.png" alt="Bin-Bandit Waste Management System Flow Infographic" width="900">
 </p>
 
 ## Waste Categories
