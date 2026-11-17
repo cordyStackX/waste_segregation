@@ -3,7 +3,7 @@
 from pathlib import Path
 
 import cv2
-from detection_classes import CLASSES, class_id_for_image
+from detection_classes import BIN_BY_CLASS, CLASSES, class_id_for_image
 
 
 SOURCE = Path("public")
@@ -12,9 +12,35 @@ IMAGE_EXTENSIONS = {".jpg", ".jpeg", ".png", ".webp", ".avif"}
 WINDOW = "Waste image annotator"
 MAX_WIDTH = 1200
 MAX_HEIGHT = 800
+WHITE = (255, 255, 255)
 
+# Colors (BGR) are per bin, so you can tell the three bins apart at a glance.
+BIN_COLORS = {
+    "biodegradable": (60, 220, 80),
+    "non_biodegradable": (255, 170, 30),
+    "residual_special_waste": (40, 50, 240),
+}
+CLASS_LEGEND = "  ".join(f"{i + 1} {name}" for i, name in enumerate(CLASSES))
+MAX_KEYS = min(len(CLASSES), 9)  # number keys 1-9
+
+
+def bin_of(cls):
+    return BIN_BY_CLASS[CLASSES[cls]]
+
+
+def color_of(cls):
+    return BIN_COLORS.get(bin_of(cls), WHITE)
+
+
+# Only scan files inside class folders (skips logos/infographics directly in public/)
 images = sorted(
-    (path for path in SOURCE.rglob("*") if path.is_file() and path.suffix.lower() in IMAGE_EXTENSIONS),
+    (
+        path
+        for path in SOURCE.rglob("*")
+        if path.is_file()
+        and path.suffix.lower() in IMAGE_EXTENSIONS
+        and path.parent != SOURCE
+    ),
     key=lambda path: str(path).lower(),
 )
 if not images:
@@ -35,6 +61,8 @@ def label_path(image_path):
 
 def mouse(event, x, y, _flags, _param):
     global drag_start, boxes
+    if display_image is None:
+        return
     if event == cv2.EVENT_LBUTTONDOWN:
         drag_start = (x, y)
     elif event == cv2.EVENT_LBUTTONUP and drag_start is not None:
@@ -48,6 +76,11 @@ def mouse(event, x, y, _flags, _param):
 
 def load_image(path):
     global boxes, display_image, scale, image_width, image_height, selected_class
+    try:
+        default_class = class_id_for_image(path, SOURCE)
+    except ValueError:
+        print(f"Skipping (no class mapping): {path}")
+        return False
     original = cv2.imread(str(path))
     if original is None:
         print(f"Cannot read image: {path}")
@@ -55,7 +88,7 @@ def load_image(path):
     image_height, image_width = original.shape[:2]
     scale = min(MAX_WIDTH / image_width, MAX_HEIGHT / image_height, 1.0)
     display_image = cv2.resize(original, (round(image_width * scale), round(image_height * scale)))
-    selected_class = class_id_for_image(path, SOURCE)
+    selected_class = default_class
     labels = label_path(path)
     boxes = []
     if labels.exists():
@@ -64,6 +97,8 @@ def load_image(path):
             if len(values) != 5:
                 continue
             cls, cx, cy, width, height = map(float, values)
+            if not 0 <= int(cls) < len(CLASSES):
+                continue
             x1 = round((cx - width / 2) * display_image.shape[1])
             y1 = round((cy - height / 2) * display_image.shape[0])
             x2 = round((cx + width / 2) * display_image.shape[1])
@@ -89,15 +124,30 @@ def save(path):
 
 def render(path):
     canvas = display_image.copy()
+    height = canvas.shape[0]
+
+    # Boxes: label shows class and its bin, colored by bin
     for cls, x1, y1, x2, y2 in boxes:
-        color = ((60, 220, 80), (255, 170, 30), (40, 50, 240))[cls]
+        color = color_of(cls)
         cv2.rectangle(canvas, (x1, y1), (x2, y2), color, 2)
-        cv2.putText(canvas, CLASSES[cls], (x1, max(18, y1 - 6)), cv2.FONT_HERSHEY_SIMPLEX, 0.55, color, 2)
-    selected = CLASSES[selected_class]
-    status = f"{index + 1}/{len(images)}  {path.relative_to(SOURCE)}  |  class: {selected}  |  boxes: {len(boxes)}"
-    cv2.putText(canvas, status[:140], (10, 22), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 1)
-    legend = "1 organic  2 plastic  3 plastic_bottle  4 cans  5 glass  6 paper  7 other_nonbio  8 residual"
-    cv2.putText(canvas, legend, (10, canvas.shape[0] - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.45, (255, 255, 255), 1)
+        text = f"{CLASSES[cls]} [{bin_of(cls)}]"
+        cv2.putText(canvas, text, (x1, max(18, y1 - 6)), cv2.FONT_HERSHEY_SIMPLEX, 0.55, color, 2)
+
+    # Status line: image, selected class, and its bin
+    status = (
+        f"{index + 1}/{len(images)}  {path.relative_to(SOURCE)}  |  "
+        f"class: {CLASSES[selected_class]} -> {bin_of(selected_class)}  |  boxes: {len(boxes)}"
+    )
+    cv2.putText(canvas, status[:160], (10, 22), cv2.FONT_HERSHEY_SIMPLEX, 0.5, WHITE, 1)
+
+    # Bottom legend: class keys, then the three bins in their colors
+    cv2.putText(canvas, CLASS_LEGEND, (10, height - 30), cv2.FONT_HERSHEY_SIMPLEX, 0.45, WHITE, 1)
+    x = 10
+    for bin_name, color in BIN_COLORS.items():
+        cv2.rectangle(canvas, (x, height - 20), (x + 12, height - 8), color, -1)
+        cv2.putText(canvas, bin_name, (x + 18, height - 8), cv2.FONT_HERSHEY_SIMPLEX, 0.45, color, 1)
+        x += 18 + cv2.getTextSize(bin_name, cv2.FONT_HERSHEY_SIMPLEX, 0.45, 1)[0][0] + 20
+
     cv2.imshow(WINDOW, canvas)
 
 
@@ -111,7 +161,7 @@ while index < len(images):
     while True:
         render(current)
         key = cv2.waitKey(20) & 0xFF
-        if ord("1") <= key <= ord("8"):
+        if ord("1") <= key < ord("1") + MAX_KEYS:
             selected_class = key - ord("1")
         elif key == ord("u") and boxes:
             boxes.pop()

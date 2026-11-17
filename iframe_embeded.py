@@ -1,10 +1,19 @@
+"""Waste detector server: the phone's camera streams frames here, YOLO runs on the laptop.
+
+Open https://<laptop-ip>:5000 on the iPhone, tap "Start camera".
+Flutter web wrapper (iframe) is served at https://<laptop-ip>:5000/app/
+iOS Safari only allows camera access over HTTPS, so this serves HTTPS (self-signed by
+default; needs `pip install cryptography`).
+"""
+
 import os
+import socket
 import threading
-import time
 from pathlib import Path
 
 import cv2
-from flask import Flask, Response, jsonify
+import numpy as np
+from flask import Flask, jsonify, request, send_from_directory
 from flask_cors import CORS
 from ultralytics import YOLO
 
@@ -13,11 +22,17 @@ from detection_classes import BIN_BY_CLASS
 
 MODEL_PATH = Path(os.getenv(
     "WASTE_DETECTION_MODEL",
-    "runs/detect/runs/detect/waste-3/weights/best.pt",
+    "runs/detect/waste_detailed/weights/best.pt",
 ))
 DEVICE = os.getenv("DEVICE", "0")
 CONFIDENCE = 0.35
 IMAGE_SIZE = 640
+PORT = int(os.getenv("PORT", "5000"))
+SSL_CERT = os.getenv("SSL_CERT")  # optional: real cert (e.g. from mkcert)
+SSL_KEY = os.getenv("SSL_KEY")
+
+# Folder produced by: flutter build web -t lib/main_web.dart --base-href /app/
+WEB_DIR = Path(__file__).parent / "flutter" / "build" / "web"
 
 if not MODEL_PATH.is_file():
     raise SystemExit(
@@ -28,10 +43,9 @@ if not MODEL_PATH.is_file():
 app = Flask(__name__)
 CORS(app)
 model = YOLO(str(MODEL_PATH))
-cap = cv2.VideoCapture(0)
+model_lock = threading.Lock()  # Flask is threaded; keep inference one-at-a-time
 
 state = {"label": "unsure", "conf": 0.0, "bin": None, "detections": []}
-latest_jpg = None
 
 
 def read_detections(result):
@@ -55,86 +69,186 @@ def read_detections(result):
     return detections
 
 
-def draw_detections(frame, detections):
-    for item in detections:
-        x1, y1, x2, y2 = item["box"]
-        color = (50 + (item["class_id"] * 47) % 206, 220, 80 + (item["class_id"] * 29) % 176)
-        cv2.rectangle(frame, (x1, y1), (x2, y2), color, 2)
-        label = f"{item['label']} {item['conf']:.0%}"
-        cv2.putText(frame, label, (x1, max(22, y1 - 8)), cv2.FONT_HERSHEY_SIMPLEX, 0.65, color, 2)
-    return frame
+@app.route("/predict", methods=["POST"])
+def predict():
+    """Body: a JPEG frame. Returns detections in that frame's pixel coordinates."""
+    data = np.frombuffer(request.get_data(), np.uint8)
+    frame = cv2.imdecode(data, cv2.IMREAD_COLOR)
+    if frame is None:
+        return jsonify(error="could not decode image"), 400
 
+    with model_lock:
+        result = model.predict(
+            frame,
+            device=DEVICE,
+            imgsz=IMAGE_SIZE,
+            conf=CONFIDENCE,
+            verbose=False,
+        )[0]
 
-def worker():
-    global latest_jpg
-    last_prediction = 0.0
-    while True:
-        ok, frame = cap.read()
-        if not ok:
-            time.sleep(0.1)
-            continue
-
-        now = time.time()
-        if now - last_prediction >= 0.2:  # Run inference up to 5 times per second.
-            result = model.predict(
-                frame,
-                device=DEVICE,
-                imgsz=IMAGE_SIZE,
-                conf=CONFIDENCE,
-                verbose=False,
-            )[0]
-            detections = read_detections(result)
-            top = detections[0] if detections else None
-            state.update(
-                label=top["label"] if top else "unsure",
-                conf=top["conf"] if top else 0.0,
-                bin=top["bin"] if top else None,
-                detections=detections,
-            )
-            last_prediction = now
-
-        draw_detections(frame, state["detections"])
-        latest_jpg = cv2.imencode(".jpg", frame)[1].tobytes()
-        time.sleep(0.03)
-
-
-@app.route("/video")
-def video():
-    def generate():
-        while True:
-            if latest_jpg is not None:
-                yield b"--frame\r\nContent-Type: image/jpeg\r\n\r\n" + latest_jpg + b"\r\n"
-            time.sleep(0.05)
-
-    return Response(generate(), mimetype="multipart/x-mixed-replace; boundary=frame")
+    detections = read_detections(result)
+    top = detections[0] if detections else None
+    state.update(
+        label=top["label"] if top else "unsure",
+        conf=top["conf"] if top else 0.0,
+        bin=top["bin"] if top else None,
+        detections=detections,
+    )
+    height, width = frame.shape[:2]
+    return jsonify({**state, "width": width, "height": height})
 
 
 @app.route("/api/result")
-def result():
+def api_result():
     return jsonify(state)
+
+
+PAGE = """<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Waste Detector</title>
+  <style>
+    body { margin:0; background:#111; color:#fff; font-family:-apple-system, sans-serif; text-align:center; }
+    h2 { margin:12px 0; }
+    .wrap { position:relative; width:100%; max-width:720px; margin:0 auto; background:#000; }
+    video { display:block; width:100%; }
+    canvas#overlay { position:absolute; inset:0; width:100%; height:100%; }
+    button { margin:14px; padding:14px 28px; font-size:18px; border:0; border-radius:10px; background:#3cdc50; color:#000; }
+    #top { font-size:22px; font-weight:600; min-height:30px; margin:8px 12px; color:#3cdc50; }
+    pre { text-align:left; margin:8px 12px; font-size:12px; white-space:pre-wrap; color:#aaa; }
+  </style>
+</head>
+<body>
+  <h2>Waste Detector</h2>
+  <div class="wrap">
+    <video id="cam" playsinline muted autoplay></video>
+    <canvas id="overlay"></canvas>
+  </div>
+  <button id="start">Start camera</button>
+  <div id="top"></div>
+  <pre id="out"></pre>
+  <script>
+    const SEND_WIDTH = 640;
+    const LABEL_GREEN = "#3cdc50";  // label text color (change to taste)
+    const COLORS = { biodegradable: "#3cdc50", non_biodegradable: "#ffaa1e", residual_special_waste: "#f03232" };
+    const video = document.getElementById("cam");
+    const overlay = document.getElementById("overlay");
+    const octx = overlay.getContext("2d");
+    const topEl = document.getElementById("top");
+    const out = document.getElementById("out");
+    const grab = document.createElement("canvas");
+    const gctx = grab.getContext("2d");
+    const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+    document.getElementById("start").onclick = async (e) => {
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        out.textContent = "Camera API unavailable. This page must be opened over https://";
+        return;
+      }
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: { ideal: "environment" }, width: { ideal: 1280 } },
+          audio: false,
+        });
+        video.srcObject = stream;
+        await video.play();
+        e.target.style.display = "none";
+        loop();
+      } catch (err) {
+        out.textContent = "Camera error: " + err.message;
+      }
+    };
+
+    function draw(data, vw, vh) {
+      overlay.width = vw;
+      overlay.height = vh;
+      octx.clearRect(0, 0, vw, vh);
+      const f = vw / data.width;
+      octx.lineWidth = Math.max(2, vw / 300);
+      const fontPx = Math.round(vw / 22);
+      const pad = Math.max(4, Math.round(vw / 120));
+      octx.font = `bold ${fontPx}px sans-serif`;
+      octx.textBaseline = "top";
+      for (const d of data.detections) {
+        const [x1, y1, x2, y2] = d.box.map((v) => v * f);
+        octx.strokeStyle = COLORS[d.bin] || "#ffffff";
+        octx.strokeRect(x1, y1, x2 - x1, y2 - y1);
+
+        // Label: solid green tag with black text, so it is readable on any background.
+        const text = `${d.label} ${Math.round(d.conf * 100)}%`;
+        const tagW = octx.measureText(text).width + pad * 2;
+        const tagH = fontPx + pad * 2;
+        const tagY = y1 - tagH >= 0 ? y1 - tagH : y1;  // flip inside the box at the top edge
+        octx.fillStyle = LABEL_GREEN;
+        octx.fillRect(x1, tagY, tagW, tagH);
+        octx.fillStyle = "#000";
+        octx.fillText(text, x1 + pad, tagY + pad);
+      }
+      if (data.detections.length) {
+        topEl.textContent = `${data.label} (${Math.round(data.conf * 100)}%) → ${data.bin}`;
+        topEl.style.color = LABEL_GREEN;
+      } else {
+        topEl.textContent = "unsure";
+        topEl.style.color = "#aaa";
+      }
+      out.textContent = JSON.stringify(data.detections.map((d) => ({ label: d.label, bin: d.bin, conf: +d.conf.toFixed(2) })), null, 1);
+    }
+
+    async function loop() {
+      const vw = video.videoWidth, vh = video.videoHeight;
+      if (vw) {
+        const s = Math.min(1, SEND_WIDTH / vw);
+        grab.width = Math.round(vw * s);
+        grab.height = Math.round(vh * s);
+        gctx.drawImage(video, 0, 0, grab.width, grab.height);
+        const blob = await new Promise((r) => grab.toBlob(r, "image/jpeg", 0.7));
+        try {
+          const res = await fetch("/predict", { method: "POST", headers: { "Content-Type": "image/jpeg" }, body: blob });
+          draw(await res.json(), vw, vh);
+        } catch (err) {
+          out.textContent = "Server error: " + err.message;
+          await sleep(500);
+        }
+      }
+      setTimeout(loop, 50); // waits for each response first, so requests never pile up
+    }
+  </script>
+</body>
+</html>
+"""
 
 
 @app.route("/")
 def index():
-    return """
-    <html>
-      <body style="margin:0;background:#111;color:#fff;font-family:sans-serif;text-align:center">
-        <h2>Waste Detector</h2>
-        <img src="/video" style="max-width:100%;border-radius:8px">
-        <pre id="out">loading...</pre>
-        <script>
-          setInterval(async () => {
-            const r = await fetch('/api/result');
-            document.getElementById('out').textContent = JSON.stringify(await r.json(), null, 2);
-          }, 300);
-        </script>
-      </body>
-    </html>
-    """
+    return PAGE
+
+
+@app.route("/app/")
+@app.route("/app/<path:p>")
+def flutter_app(p="index.html"):
+    """Serves the Flutter web build (which embeds the detector page in an iframe)."""
+    if not WEB_DIR.is_dir():
+        return (
+            "Flutter web build not found. Run: "
+            "cd flutter && flutter build web -t lib/main_web.dart --base-href /app/",
+            404,
+        )
+    return send_from_directory(WEB_DIR, p)
+
+
+def lan_ip():
+    try:
+        with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
+            s.connect(("10.255.255.255", 1))
+            return s.getsockname()[0]
+    except OSError:
+        return "<laptop-ip>"
 
 
 if __name__ == "__main__":
-    if not cap.isOpened():
-        raise SystemExit("Can't open camera. Check permissions or change VideoCapture(0).")
-    threading.Thread(target=worker, daemon=True).start()
-    app.run(host="0.0.0.0", port=5000, threaded=True)
+    ssl_context = (SSL_CERT, SSL_KEY) if SSL_CERT and SSL_KEY else "adhoc"
+    print(f"\nOpen on your iPhone (same Wi-Fi): https://{lan_ip()}:{PORT}")
+    print(f"Flutter web app:                  https://{lan_ip()}:{PORT}/app/\n")
+    app.run(host="0.0.0.0", port=PORT, threaded=True, ssl_context=ssl_context)
