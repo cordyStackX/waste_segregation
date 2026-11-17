@@ -1,50 +1,24 @@
-"""Shared class names and source-folder mapping for waste object detection."""
+"""Single source of truth for the 3 waste classes (one class per bin)."""
 
 from pathlib import Path
 
 CLASSES = [
-    "organic",
-    "plastic",
-    "plastic_bottle",
-    "cans",
-    "glass",
-    "paper",
-    "other_non_biodegradable",
+    "biodegradable",
+    "non_biodegradable",
     "residual_special_waste",
 ]
 
-BIN_BY_CLASS = {
-    "organic": "biodegradable",
-    "plastic": "non_biodegradable",
-    "plastic_bottle": "non_biodegradable",
-    "cans": "non_biodegradable",
-    "glass": "non_biodegradable",
-    "paper": "non_biodegradable",
-    "other_non_biodegradable": "non_biodegradable",
-    "residual_special_waste": "residual_special_waste",
-}
-
-FOLDER_TO_CLASS = {
-    "food scraps": "organic",
-    "fruit peels": "organic",
-    "organic": "organic",
-    "plastic": "plastic",
-    "plastic bottles": "plastic_bottle",
-    "cans": "cans",
-    "glass": "glass",
-    "paper": "paper",
-    "residual": "residual_special_waste",
-    "residual_special_waste": "residual_special_waste",
-    "biodegradable": "organic",
-    "non_biodegradable": "other_non_biodegradable",
-}
+# Each class is its own bin (kept so older code that imports it still works)
+BIN_BY_CLASS = {name: name for name in CLASSES}
 
 
-def class_id_for_image(image_path, source=Path("public")):
-    """Infer a reviewable default label from the closest recognized folder."""
-    relative = Path(image_path).relative_to(source)
-    for part in reversed(relative.parts[:-1]):
-        name = FOLDER_TO_CLASS.get(part.strip().lower())
-        if name is not None:
-            return CLASSES.index(name)
-    raise ValueError(f"No detection class mapping for image: {image_path}")
+def class_id_for_image(path, source):
+    """Class ID comes from the top-level folder under `source` (public/).
+    Subfolders like 'Food scraps', 'cans', 'glass' are ignored."""
+    parts = Path(path).relative_to(source).parts
+    if len(parts) < 2:
+        raise ValueError(f"Image is not inside a class folder: {path}")
+    top = parts[0].lower()
+    if top not in CLASSES:
+        raise ValueError(f"No class mapping for {path}")
+    return CLASSES.index(top)

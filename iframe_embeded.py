@@ -17,8 +17,12 @@ from flask import Flask, jsonify, request, send_from_directory
 from flask_cors import CORS
 from ultralytics import YOLO
 
-from detection_classes import BIN_BY_CLASS
+import json
 
+# Written by build_dataset.py: detailed class name -> bin
+BIN_BY_CLASS = json.loads(
+    (Path(__file__).parent / "bin_by_class.json").read_text()
+)
 
 MODEL_PATH = Path(os.getenv(
     "WASTE_DETECTION_MODEL",
@@ -248,7 +252,11 @@ def lan_ip():
 
 
 if __name__ == "__main__":
-    ssl_context = (SSL_CERT, SSL_KEY) if SSL_CERT and SSL_KEY else "adhoc"
-    print(f"\nOpen on your iPhone (same Wi-Fi): https://{lan_ip()}:{PORT}")
-    print(f"Flutter web app:                  https://{lan_ip()}:{PORT}/app/\n")
+    use_https = os.getenv("HTTPS", "0") != "0"
+    ssl_context = None
+    if use_https:
+        ssl_context = (SSL_CERT, SSL_KEY) if SSL_CERT and SSL_KEY else "adhoc"
+    scheme = "https" if use_https else "http"
+    print(f"\nOpen on your iPhone (same Wi-Fi): {scheme}://{lan_ip()}:{PORT}")
+    print(f"Flutter web app:                  {scheme}://{lan_ip()}:{PORT}/app/\n")
     app.run(host="0.0.0.0", port=PORT, threaded=True, ssl_context=ssl_context)
