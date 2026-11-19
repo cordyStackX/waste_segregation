@@ -26,7 +26,7 @@ BIN_BY_CLASS = json.loads(
 
 MODEL_PATH = Path(os.getenv(
     "WASTE_DETECTION_MODEL",
-    "runs/detect/waste_detailed/weights/best.pt",
+    "runs/detect/waste_detailed-4/weights/best.pt",
 ))
 DEVICE = os.getenv("DEVICE", "0")
 CONFIDENCE = 0.35
@@ -63,7 +63,8 @@ def read_detections(result):
         conf = float(box.conf[0].item())
         x1, y1, x2, y2 = (int(round(value)) for value in box.xyxy[0].tolist())
         detections.append({
-            "label": label,
+            "label": BIN_BY_CLASS.get(label) or label,
+            "type": label,
             "conf": conf,
             "bin": BIN_BY_CLASS.get(label),
             "box": [x1, y1, x2, y2],
@@ -191,7 +192,7 @@ PAGE = """<!doctype html>
         octx.fillText(text, x1 + pad, tagY + pad);
       }
       if (data.detections.length) {
-        topEl.textContent = `${data.label} (${Math.round(data.conf * 100)}%) → ${data.bin}`;
+        topEl.textContent = `${data.bin} (${Math.round(data.conf * 100)}%)`;
         topEl.style.color = LABEL_GREEN;
       } else {
         topEl.textContent = "unsure";

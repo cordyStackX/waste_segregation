@@ -4,6 +4,7 @@ import json
 import random
 import shutil
 from pathlib import Path
+import hashlib
 
 SOURCE = Path("public")
 ANNOTATIONS = Path("annotations_detailed")
@@ -57,7 +58,8 @@ n_val = max(1, int(len(items) * VAL_RATIO))
 
 for i, (img, label, name, _bin) in enumerate(items):
     split = "val" if i < n_val else "train"
-    stem = "_".join(img.relative_to(SOURCE).with_suffix("").parts).replace(" ", "-")
+    rel = "_".join(img.relative_to(SOURCE).with_suffix("").parts).replace(" ", "-")
+    stem = rel[:80] + "_" + hashlib.md5(rel.encode()).hexdigest()[:8]
     shutil.copy(img, OUT / "images" / split / f"{stem}{img.suffix.lower()}")
     rows = []
     for line in label.read_text().splitlines():

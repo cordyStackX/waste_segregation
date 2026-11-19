@@ -1,6 +1,11 @@
-"""Draw YOLO bounding boxes for images in public/ using OpenCV (3 classes)."""
+"""Draw YOLO bounding boxes for images in public/ using OpenCV (3 classes).
+
+Keys: 1-3 choose class, u undo box, c clear boxes, s save + next, n next,
+      p previous, d (twice) remove image, q/Esc quit.
+"""
 
 from pathlib import Path
+import shutil
 import sys
 
 import cv2
@@ -8,11 +13,13 @@ from detection_classes import CLASSES, class_id_for_image
 
 SOURCE = Path("public")
 ANNOTATIONS = Path("annotations_detailed")
+TRASH = Path("removed_images")  # images removed with "d" are moved here
 IMAGE_EXTENSIONS = {".jpg", ".jpeg", ".png", ".webp", ".avif"}
 WINDOW = "Waste image annotator"
 MAX_WIDTH = 1200
 MAX_HEIGHT = 800
 WHITE = (255, 255, 255)
+RED = (40, 50, 240)
 FONT = cv2.FONT_HERSHEY_SIMPLEX
 
 # BGR colors, one per class
@@ -21,7 +28,10 @@ CLASS_COLORS = [
     (255, 170, 30),   # non_biodegradable
     (40, 50, 240),    # residual_special_waste
 ]
-CLASS_LEGEND = "  ".join(f"{i + 1} {name}" for i, name in enumerate(CLASSES))
+CLASS_LEGEND = (
+    "  ".join(f"{i + 1} {name}" for i, name in enumerate(CLASSES))
+    + "  |  d remove image"
+)
 MAX_KEYS = len(CLASSES)  # keys 1-3
 
 
@@ -51,10 +61,23 @@ drag_now = None
 display_image = None
 scale = 1.0
 image_width = image_height = 0
+pending_delete = False  # True after the first "d" press, waiting for confirmation
 
 
 def label_path(image_path):
     return ANNOTATIONS / image_path.relative_to(SOURCE).with_suffix(".txt")
+
+
+def remove_image(path):
+    """Move the image to TRASH (keeping its class folder) and drop its label file."""
+    dest = TRASH / path.relative_to(SOURCE)
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    shutil.move(str(path), str(dest))
+    labels = label_path(path)
+    if labels.exists():
+        labels.unlink()
+    print(f"Removed: {path} -> {dest}")
+
 
 # Resume: skip images that already have a saved label file.
 # Run `python annotate.py --all` to go through everything again.
@@ -62,6 +85,7 @@ if "--all" not in sys.argv:
     images = [p for p in images if not label_path(p).exists()]
     if not images:
         raise SystemExit("All images already have labels. Use --all to review them.")
+
 
 def clamp(value, low, high):
     return max(low, min(value, high))
@@ -159,6 +183,12 @@ def render(path):
         f"class: {CLASSES[selected_class]}  |  boxes: {len(boxes)}"
     )
     cv2.putText(canvas, status[:160], (10, 22), FONT, 0.5, WHITE, 1)
+    if pending_delete:
+        cv2.putText(
+            canvas,
+            "Press d again to REMOVE this image (any other key cancels)",
+            (10, 46), FONT, 0.6, RED, 2,
+        )
 
     # Bottom legend: keys, then colored class swatches
     cv2.putText(canvas, CLASS_LEGEND, (10, height - 30), FONT, 0.45, WHITE, 1)
@@ -175,14 +205,25 @@ cv2.namedWindow(WINDOW, cv2.WINDOW_AUTOSIZE)
 cv2.setMouseCallback(WINDOW, mouse)
 while index < len(images):
     current = images[index]
+    pending_delete = False
     if not load_image(current):
         index += 1
         continue
     while True:
         render(current)
         key = cv2.waitKey(20) & 0xFF
+        if key != 255 and key != ord("d"):
+            pending_delete = False  # any other key cancels the confirmation
+
         if ord("1") <= key < ord("1") + MAX_KEYS:
             selected_class = key - ord("1")
+        elif key == ord("d"):
+            if pending_delete:
+                remove_image(current)
+                images.pop(index)  # don't advance: next image slides into this slot
+                pending_delete = False
+                break
+            pending_delete = True
         elif key == ord("u") and boxes:
             boxes.pop()
         elif key == ord("c"):
