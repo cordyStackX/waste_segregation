@@ -23,8 +23,8 @@ MODEL_PATH = Path(os.getenv(
     "runs/detect/waste_detailed-5/weights/best.pt",
 ))
 DEVICE = os.getenv("DEVICE", "0")
-CONFIDENCE = float(os.getenv("WASTE_CONFIDENCE", "0.35"))
-IMAGE_SIZE = int(os.getenv("WASTE_IMAGE_SIZE", "512"))
+CONFIDENCE = float(os.getenv("WASTE_CONFIDENCE", "0.20"))
+IMAGE_SIZE = int(os.getenv("WASTE_IMAGE_SIZE", "640"))
 PORT = int(os.getenv("WASTE_PORT", os.getenv("PORT", "5000")))
 SSL_CERT = os.getenv("SSL_CERT")  # optional: real cert (e.g. from mkcert)
 SSL_KEY = os.getenv("SSL_KEY")

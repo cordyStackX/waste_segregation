@@ -482,29 +482,9 @@ class _LiveCameraPageState extends State<LiveCameraPage> {
   }
 
   Widget _cameraView(CameraController controller) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final orientation = controller.value.deviceOrientation;
-        final landscape =
-            orientation == DeviceOrientation.landscapeLeft ||
-            orientation == DeviceOrientation.landscapeRight;
-        final aspect = landscape
-            ? controller.value.aspectRatio
-            : 1 / controller.value.aspectRatio;
-        final width = constraints.maxWidth;
-        final height = width / aspect;
-        return ClipRect(
-          child: FittedBox(
-            fit: BoxFit.cover,
-            child: SizedBox(
-              width: width,
-              height: height,
-              child: CameraPreview(controller),
-            ),
-          ),
-        );
-      },
-    );
+    // Keep the complete camera frame visible. Cover crops the long edges on
+    // wide screens and makes the camera look zoomed compared with camera.py.
+    return Center(child: CameraPreview(controller));
   }
 
   Widget _cameraPlaceholder() => Center(
@@ -679,7 +659,7 @@ class _DetectionPainter extends CustomPainter {
       scan.frameWidth.toDouble(),
       scan.frameHeight.toDouble(),
     );
-    final fitted = applyBoxFit(BoxFit.cover, imageSize, size);
+    final fitted = applyBoxFit(BoxFit.contain, imageSize, size);
     final source = Alignment.center.inscribe(
       fitted.source,
       Offset.zero & imageSize,

@@ -1,12 +1,13 @@
-"""Draw YOLO bounding boxes for images in public/ using OpenCV (3 classes).
+"""Draw YOLO boxes for the three waste bins using OpenCV.
 
-Keys: 1-3 choose class, u undo box, c clear boxes, s save + next, n next,
-      p previous, d (twice) remove image, q/Esc quit.
+Use --folder batch_1 to annotate only public/batch_1 (or --folder TACO).
+Keys: 1-3 choose a bin, u undo, c clear, s save + next, n next, p previous,
+      d twice remove image, q/Esc quit. Use --all to review saved labels too.
 """
 
+import argparse
 from pathlib import Path
 import shutil
-import sys
 
 import cv2
 from detection_classes import CLASSES, class_id_for_image
@@ -36,7 +37,7 @@ MAX_KEYS = len(CLASSES)  # keys 1-3
 
 
 def color_of(cls):
-    return CLASS_COLORS[cls] if 0 <= cls < len(CLASS_COLORS) else WHITE
+    return CLASS_COLORS[cls] if cls is not None and 0 <= cls < len(CLASS_COLORS) else WHITE
 
 
 # Only scan files inside class folders (skips logos/infographics directly in public/)
@@ -50,12 +51,26 @@ images = sorted(
     ),
     key=lambda path: str(path).lower(),
 )
+
+parser = argparse.ArgumentParser(description="Annotate waste images with the three bin labels.")
+parser.add_argument("--all", action="store_true", help="include images with saved labels")
+parser.add_argument("--folder", help="only scan this folder under public/, e.g. batch_1 or TACO")
+args = parser.parse_args()
+
+if args.folder:
+    folder_parts = Path(args.folder).parts
+    if Path(args.folder).is_absolute() or ".." in folder_parts:
+        raise SystemExit("--folder must be a relative folder path under public/")
+    images = [
+        image for image in images
+        if image.relative_to(SOURCE).parts[:len(folder_parts)] == folder_parts
+    ]
 if not images:
-    raise SystemExit(f"No images found under {SOURCE}")
+    raise SystemExit(f"No images found under {SOURCE / args.folder if args.folder else SOURCE}")
 
 index = 0
 boxes = []
-selected_class = 0
+selected_class = None
 drag_start = None
 drag_now = None
 display_image = None
@@ -80,8 +95,7 @@ def remove_image(path):
 
 
 # Resume: skip images that already have a saved label file.
-# Run `python annotate.py --all` to go through everything again.
-if "--all" not in sys.argv:
+if not args.all:
     images = [p for p in images if not label_path(p).exists()]
     if not images:
         raise SystemExit("All images already have labels. Use --all to review them.")
@@ -104,7 +118,7 @@ def mouse(event, x, y, _flags, _param):
     elif event == cv2.EVENT_LBUTTONUP and drag_start is not None:
         x1, x2 = sorted((clamp(drag_start[0], 0, w - 1), clamp(x, 0, w - 1)))
         y1, y2 = sorted((clamp(drag_start[1], 0, h - 1), clamp(y, 0, h - 1)))
-        if x2 - x1 >= 2 and y2 - y1 >= 2:
+        if selected_class is not None and x2 - x1 >= 2 and y2 - y1 >= 2:
             boxes.append((selected_class, x1, y1, x2, y2))
         drag_start = None
         drag_now = None
@@ -114,9 +128,10 @@ def load_image(path):
     global boxes, display_image, scale, image_width, image_height, selected_class
     try:
         default_class = class_id_for_image(path, SOURCE)
-    except ValueError as err:
-        print(f"Skipping: {err}")
-        return False
+    except ValueError:
+        # Batch/TACO folders do not encode a bin. Require a deliberate key
+        # choice before drawing each new box rather than guessing a category.
+        default_class = None
     original = cv2.imread(str(path))
     if original is None:
         print(f"Cannot read image: {path}")
@@ -174,13 +189,13 @@ def render(path):
         cv2.putText(canvas, CLASSES[cls], (x1, max(18, y1 - 6)), FONT, 0.55, color, 2)
 
     # Box currently being dragged
-    if drag_start is not None and drag_now is not None:
+    if selected_class is not None and drag_start is not None and drag_now is not None:
         cv2.rectangle(canvas, drag_start, drag_now, color_of(selected_class), 1)
 
     # Status line
     status = (
         f"{index + 1}/{len(images)}  {path.relative_to(SOURCE)}  |  "
-        f"class: {CLASSES[selected_class]}  |  boxes: {len(boxes)}"
+        f"bin: {CLASSES[selected_class] if selected_class is not None else 'choose 1-3 first'}  |  boxes: {len(boxes)}"
     )
     cv2.putText(canvas, status[:160], (10, 22), FONT, 0.5, WHITE, 1)
     if pending_delete:
