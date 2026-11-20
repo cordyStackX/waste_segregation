@@ -1,4 +1,4 @@
-path: /home/cordystackx/Github/waste_segregation/detection_dataset
+path: /workspaces/waste_segregation/detection_dataset
 train: images/train
 val: images/val
 nc: 3
