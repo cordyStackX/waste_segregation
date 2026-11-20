@@ -1,5 +1,5 @@
 path: /home/cordystackx/Github/waste_segregation/detection_dataset
 train: images/train
 val: images/val
-nc: 12
-names: ['cans', 'class_a_ordinary_residual', 'class_b_contaminated_residual', 'class_c_hazardous_residual', 'food_scraps', 'fruit_peels', 'glass', 'paper', 'plastic', 'plastic_bottles', 'vegetable_wastes', 'wood']
+nc: 3
+names: ['biodegradable', 'non_biodegradable', 'residual_special_waste']

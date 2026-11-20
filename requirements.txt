@@ -1,0 +1,9 @@
+# YOLO training and inference (installs PyTorch and torchvision as dependencies)
+ultralytics
+
+# Python prediction API
+Flask
+flask-cors
+
+# Camera capture and annotation UI
+opencv-python
