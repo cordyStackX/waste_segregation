@@ -13,8 +13,8 @@ Usage: ./run.sh <command>
 
   server            start the Python analysis API                         [default]
   camera            run Python/OpenCV camera preview with live predictions
-  dataset           build detection_dataset/ from public/ and annotations
-  train             build the detection dataset, then train YOLO
+  dataset [--replace]  build detection_dataset/ from public/ and annotations
+  train [--replace]    build the detection dataset, then train YOLO
   test <images...>  run object detection on image files
   app               run the Flutter app, pointed at this machine
   all               server + Flutter app together (Ctrl+C stops both)
@@ -77,11 +77,11 @@ case "$cmd" in
     ;;
   dataset)
     use_venv
-    exec python build_dataset.py
+    exec python build_dataset.py "$@"
     ;;
   train)
     use_venv
-    python build_dataset.py
+    python build_dataset.py "$@"
     exec python train_detection.py
     ;;
   test)
