@@ -4,7 +4,7 @@ from pathlib import Path
 import cv2
 from ultralytics import YOLO
 
-MODEL_PATH = "runs/detect/waste_detailed-4/weights/best.pt"  # change if your best.pt is elsewhere
+MODEL_PATH = "runs/detect/waste_detailed-5/weights/best.pt"  # change if your best.pt is elsewhere
 CONFIDENCE = 0.35
 IMAGE_SIZE = 640
 WINDOW = "Waste detector (q to quit, f for fullscreen)"
