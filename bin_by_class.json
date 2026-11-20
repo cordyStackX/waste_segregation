@@ -6,7 +6,7 @@
   "plastic_bottles": "non_biodegradable",
   "cans": "non_biodegradable",
   "glass": "non_biodegradable",
-  "paper": "non_biodegradable",
+  "paper": "biodegradable",
   "plastic": "non_biodegradable",
   "class_a_ordinary_residual": "residual_special_waste",
   "class_b_contaminated_residual": "residual_special_waste",

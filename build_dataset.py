@@ -44,6 +44,8 @@ for img in sorted(SOURCE.rglob("*")):
 
 names = sorted({name for _, _, name, _ in items})
 bin_by_class = {name: b for _, _, name, b in items for name in [name]}
+# Paper is routed to the biodegradable bin in the app's current sorting rules.
+bin_by_class["paper"] = "biodegradable"
 class_id = {name: i for i, name in enumerate(names)}
 
 # Start clean

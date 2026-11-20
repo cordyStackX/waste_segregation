@@ -95,5 +95,5 @@ fi
 
 say "Done"
 echo "Next:"
-echo "  ./run.sh server     # camera + model + web API"
+echo "  ./run.sh all        # Flutter camera app + Python analysis API"
 echo "  ./run.sh help       # all commands"

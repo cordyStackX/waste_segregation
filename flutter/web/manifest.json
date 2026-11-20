@@ -1,6 +1,6 @@
 {
-    "name": "waste_app",
-    "short_name": "waste_app",
+    "name": "BinThere",
+    "short_name": "BinThere",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

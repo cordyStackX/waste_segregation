@@ -11,11 +11,11 @@ usage() {
   cat <<'USAGE'
 Usage: ./run.sh <command>
 
-  server            start the Python brain (camera stream + /api/result)   [default]
-  camera            local OpenCV window with live predictions
-  dataset           build dataset/ from public/
-  train             build dataset/, then train the model
-  test <images...>  classify image files
+  server            start the Python analysis API                         [default]
+  camera            run Python/OpenCV camera preview with live predictions
+  dataset           build detection_dataset/ from public/ and annotations
+  train             build the detection dataset, then train YOLO
+  test <images...>  run object detection on image files
   app               run the Flutter app, pointed at this machine
   all               server + Flutter app together (Ctrl+C stops both)
   arduino compile   compile the sketch
@@ -27,7 +27,7 @@ Environment overrides:
   PORT=/dev/ttyACM0   Arduino serial port
   FQBN=arduino:avr:uno   Arduino board
   DEVICE=chrome       Flutter device
-  SERVER_PORT=5000    web server port
+  SERVER_PORT=5000    Python analysis API port
 USAGE
 }
 
@@ -68,8 +68,8 @@ if [[ $# -gt 0 ]]; then shift; fi
 case "$cmd" in
   server)
     use_venv
-    echo "Open: http://$(host_ip):${SERVER_PORT}/"
-    exec python iframe_embeded.py
+    echo "Python analysis API: http://$(host_ip):${SERVER_PORT}"
+    exec env WASTE_PORT="$SERVER_PORT" python iframe_embeded.py
     ;;
   camera)
     use_venv
@@ -82,7 +82,7 @@ case "$cmd" in
   train)
     use_venv
     python build_dataset.py
-    exec python main.py
+    exec python train_detection.py
     ;;
   test)
     use_venv
@@ -94,7 +94,7 @@ case "$cmd" in
     ;;
   all)
     use_venv
-    python iframe_embeded.py &
+    env WASTE_PORT="$SERVER_PORT" python iframe_embeded.py &
     server_pid=$!
     trap 'kill "$server_pid" 2>/dev/null || true' EXIT INT TERM
     sleep 3
