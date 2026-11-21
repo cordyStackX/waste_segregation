@@ -201,6 +201,10 @@ class _LiveCameraPageState extends State<LiveCameraPage> {
     return union > 0 ? intersection / union : 0;
   }
 
+  BoxFit _cameraFit(Size size) => size.width < 600 && size.height > size.width
+      ? BoxFit.cover
+      : BoxFit.contain;
+
   bool _isUltraWideBackCamera(CameraDescription camera) {
     if (camera.lensDirection != CameraLensDirection.back) return false;
     final name = camera.name.toLowerCase().replaceAll('_', ' ');
@@ -505,7 +509,12 @@ class _LiveCameraPageState extends State<LiveCameraPage> {
           if (ready && _scan != null)
             Positioned.fill(
               child: IgnorePointer(
-                child: CustomPaint(painter: _DetectionPainter(_scan!)),
+                child: CustomPaint(
+                  painter: _DetectionPainter(
+                    _scan!,
+                    fit: _cameraFit(MediaQuery.sizeOf(context)),
+                  ),
+                ),
               ),
             ),
           const IgnorePointer(child: _ScreenShade()),
@@ -601,9 +610,26 @@ class _LiveCameraPageState extends State<LiveCameraPage> {
   }
 
   Widget _cameraView(CameraController controller) {
-    // Keep the complete camera frame visible. Cover crops the long edges on
-    // wide screens and makes the camera look zoomed compared with camera.py.
-    return Center(child: CameraPreview(controller));
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final size = Size(constraints.maxWidth, constraints.maxHeight);
+        final aspectRatio = controller.value.aspectRatio;
+        final preview = SizedBox(
+          width: size.width,
+          height: size.width / aspectRatio,
+          child: CameraPreview(controller),
+        );
+        return ClipRect(
+          child: SizedBox.expand(
+            child: FittedBox(
+              fit: _cameraFit(size),
+              alignment: Alignment.center,
+              child: preview,
+            ),
+          ),
+        );
+      },
+    );
   }
 
   Widget _cameraPlaceholder() => Center(
@@ -767,9 +793,10 @@ class _ResultPanel extends StatelessWidget {
 }
 
 class _DetectionPainter extends CustomPainter {
-  const _DetectionPainter(this.scan);
+  const _DetectionPainter(this.scan, {required this.fit});
 
   final WasteScan scan;
+  final BoxFit fit;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -778,7 +805,7 @@ class _DetectionPainter extends CustomPainter {
       scan.frameWidth.toDouble(),
       scan.frameHeight.toDouble(),
     );
-    final fitted = applyBoxFit(BoxFit.contain, imageSize, size);
+    final fitted = applyBoxFit(fit, imageSize, size);
     final source = Alignment.center.inscribe(
       fitted.source,
       Offset.zero & imageSize,
@@ -839,7 +866,7 @@ class _DetectionPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant _DetectionPainter oldDelegate) =>
-      oldDelegate.scan != scan;
+      oldDelegate.scan != scan || oldDelegate.fit != fit;
 }
 
 String _binName(String code) => switch (code) {

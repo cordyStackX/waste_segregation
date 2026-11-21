@@ -70,7 +70,7 @@ case "$cmd" in
   server)
     use_venv
     echo "Python analysis API: http://$(host_ip):${SERVER_PORT}"
-    exec env WASTE_PORT="$SERVER_PORT" python iframe_embeded.py
+    exec HTTPS=1 SSL_CERT=/tmp/binthere-cert.pem SSL_KEY=/tmp/binthere-key.pem python iframe_embeded.py
     ;;
   camera)
     use_venv
