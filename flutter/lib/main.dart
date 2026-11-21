@@ -160,7 +160,9 @@ class _LiveCameraPageState extends State<LiveCameraPage> {
   Future<void> _startCamera(int index) async {
     final controller = CameraController(
       _cameras[index],
-      ResolutionPreset.medium,
+      // Request a sharper 720p-class preview while keeping Linux inference
+      // uploads capped separately at _maxUploadWidth to limit added lag.
+      ResolutionPreset.high,
       enableAudio: false,
     );
     if (!mounted) {
