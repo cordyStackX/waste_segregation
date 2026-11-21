@@ -20,7 +20,7 @@ BIN_BY_CLASS = json.loads(
 
 MODEL_PATH = Path(os.getenv(
     "WASTE_DETECTION_MODEL",
-    "runs/detect/waste_detailed-5/weights/best.pt",
+    "runs/detect/waste_detailed-6/weights/best.pt",
 ))
 DEVICE = os.getenv("DEVICE", "0")
 CONFIDENCE = float(os.getenv("WASTE_CONFIDENCE", "0.20"))
