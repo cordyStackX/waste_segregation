@@ -20,10 +20,10 @@ BIN_BY_CLASS = json.loads(
 
 MODEL_PATH = Path(os.getenv(
     "WASTE_DETECTION_MODEL",
-    "runs/detect/waste_detailed-6/weights/best.pt",
+    "runs/detect/waste_detailed-7/weights/best.pt",
 ))
 DEVICE = os.getenv("DEVICE", "0")
-CONFIDENCE = float(os.getenv("WASTE_CONFIDENCE", "0.10"))
+CONFIDENCE = float(os.getenv("WASTE_CONFIDENCE", "0.40"))
 IMAGE_SIZE = int(os.getenv("WASTE_IMAGE_SIZE", "640"))
 PORT = int(os.getenv("WASTE_PORT", os.getenv("PORT", "5000")))
 SSL_CERT = os.getenv("SSL_CERT")  # optional: real cert (e.g. from mkcert)

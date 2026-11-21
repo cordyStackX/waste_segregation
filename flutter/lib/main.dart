@@ -15,6 +15,8 @@ const _configuredBrainUrl = String.fromEnvironment('BRAIN_URL');
 const _ink = Color(0xFF101713);
 const _panel = Color(0xE61A261F);
 const _maxUploadWidth = 640;
+const _liveAnalysisInterval = Duration(milliseconds: 175);
+const _boxSmoothing = 0.7;
 
 String get _defaultBrainUrl {
   if (_configuredBrainUrl.isNotEmpty) return _configuredBrainUrl;
@@ -22,8 +24,13 @@ String get _defaultBrainUrl {
   return 'http://127.0.0.1:5000';
 }
 
-void main() {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  if (!kIsWeb) {
+    await SystemChrome.setPreferredOrientations(const [
+      DeviceOrientation.portraitUp,
+    ]);
+  }
   runApp(const WasteApp());
 }
 
@@ -124,6 +131,86 @@ class _LiveCameraPageState extends State<LiveCameraPage> {
   int _cameraIndex = 0;
   DateTime _lastStreamUpload = DateTime.fromMillisecondsSinceEpoch(0);
 
+  WasteScan _smoothScan(WasteScan next) {
+    final previous = _scan;
+    if (previous == null ||
+        previous.frameWidth != next.frameWidth ||
+        previous.frameHeight != next.frameHeight ||
+        previous.detections.isEmpty ||
+        next.detections.isEmpty) {
+      return next;
+    }
+
+    final usedPrevious = <int>{};
+    final detections = next.detections
+        .map((detection) {
+          var bestIndex = -1;
+          var bestOverlap = 0.15;
+          for (var index = 0; index < previous.detections.length; index++) {
+            if (usedPrevious.contains(index) ||
+                previous.detections[index].className != detection.className) {
+              continue;
+            }
+            final overlap = _boxIoU(
+              previous.detections[index].box,
+              detection.box,
+            );
+            if (overlap > bestOverlap) {
+              bestOverlap = overlap;
+              bestIndex = index;
+            }
+          }
+          if (bestIndex < 0) return detection;
+
+          usedPrevious.add(bestIndex);
+          final oldBox = previous.detections[bestIndex].box;
+          final box = List<double>.generate(
+            4,
+            (index) =>
+                oldBox[index] * (1 - _boxSmoothing) +
+                detection.box[index] * _boxSmoothing,
+            growable: false,
+          );
+          return WasteDetection(
+            bin: detection.bin,
+            className: detection.className,
+            confidence: detection.confidence,
+            box: box,
+          );
+        })
+        .toList(growable: false);
+
+    return WasteScan(
+      detections: detections,
+      frameWidth: next.frameWidth,
+      frameHeight: next.frameHeight,
+    );
+  }
+
+  double _boxIoU(List<double> a, List<double> b) {
+    final left = a[0] > b[0] ? a[0] : b[0];
+    final top = a[1] > b[1] ? a[1] : b[1];
+    final right = a[2] < b[2] ? a[2] : b[2];
+    final bottom = a[3] < b[3] ? a[3] : b[3];
+    final intersection =
+        (right - left).clamp(0.0, double.infinity) *
+        (bottom - top).clamp(0.0, double.infinity);
+    final areaA = (a[2] - a[0]) * (a[3] - a[1]);
+    final areaB = (b[2] - b[0]) * (b[3] - b[1]);
+    final union = areaA + areaB - intersection;
+    return union > 0 ? intersection / union : 0;
+  }
+
+  bool _isUltraWideBackCamera(CameraDescription camera) {
+    if (camera.lensDirection != CameraLensDirection.back) return false;
+    final name = camera.name.toLowerCase().replaceAll('_', ' ');
+    return camera.lensType == CameraLensType.ultraWide ||
+        name.contains('ultra wide') ||
+        name.contains('ultrawide') ||
+        name.contains('0.5x') ||
+        name.contains('0.5×');
+  }
+
   @override
   void initState() {
     super.initState();
@@ -138,10 +225,14 @@ class _LiveCameraPageState extends State<LiveCameraPage> {
         return;
       }
       if (!mounted) return;
+      final ultraWideIndex = _cameras.indexWhere(_isUltraWideBackCamera);
       final preferredIndex = _cameras.indexWhere(
         (camera) => camera.lensDirection == CameraLensDirection.back,
       );
-      await _startCamera(preferredIndex < 0 ? 0 : preferredIndex);
+      final cameraIndex = ultraWideIndex >= 0
+          ? ultraWideIndex
+          : (preferredIndex < 0 ? 0 : preferredIndex);
+      await _startCamera(cameraIndex);
     } on CameraException catch (error) {
       _setCameraError(_cameraMessage(error));
     } on MissingPluginException {
@@ -158,11 +249,15 @@ class _LiveCameraPageState extends State<LiveCameraPage> {
   }
 
   Future<void> _startCamera(int index) async {
+    final resolutionPreset =
+        kIsWeb && defaultTargetPlatform == TargetPlatform.iOS
+        ? ResolutionPreset.medium
+        : ResolutionPreset.high;
     final controller = CameraController(
       _cameras[index],
-      // Request a sharper 720p-class preview while keeping Linux inference
-      // uploads capped separately at _maxUploadWidth to limit added lag.
-      ResolutionPreset.high,
+      // Medium avoids a 16:9 crop on iPhone Safari; other platforms keep the
+      // sharper preset. Linux inference uploads are resized separately.
+      resolutionPreset,
       enableAudio: false,
     );
     if (!mounted) {
@@ -177,6 +272,16 @@ class _LiveCameraPageState extends State<LiveCameraPage> {
     });
     try {
       await controller.initialize().timeout(const Duration(seconds: 20));
+      if (!mounted || !identical(_controller, controller)) return;
+      // Use the widest zoom the active lens/browser exposes. On iPhones that
+      // report the ultra-wide lens, it is selected above; web browsers may
+      // instead expose a zoom range that can start below 1x.
+      try {
+        final minZoom = await controller.getMinZoomLevel();
+        if (minZoom < 1.0) await controller.setZoomLevel(minZoom);
+      } on CameraException catch (error) {
+        debugPrint('Could not set the camera to its widest zoom: $error');
+      }
       if (!mounted || !identical(_controller, controller)) return;
       setState(() => _cameraError = null);
       if (!kIsWeb && defaultTargetPlatform == TargetPlatform.linux) {
@@ -262,7 +367,7 @@ class _LiveCameraPageState extends State<LiveCameraPage> {
         if (mounted) setState(() => _analyzing = false);
       }
 
-      final remaining = const Duration(milliseconds: 350) - timer.elapsed;
+      final remaining = _liveAnalysisInterval - timer.elapsed;
       if (remaining > Duration.zero) await Future<void>.delayed(remaining);
     }
   }
@@ -272,8 +377,7 @@ class _LiveCameraPageState extends State<LiveCameraPage> {
         _paused ||
         _analyzing ||
         !identical(_controller, controller) ||
-        DateTime.now().difference(_lastStreamUpload) <
-            const Duration(milliseconds: 220)) {
+        DateTime.now().difference(_lastStreamUpload) < _liveAnalysisInterval) {
       return;
     }
     _lastStreamUpload = DateTime.now();
@@ -336,7 +440,7 @@ class _LiveCameraPageState extends State<LiveCameraPage> {
     }
     if (mounted && identical(_controller, controller)) {
       setState(() {
-        _scan = WasteScan.fromJson(data);
+        _scan = _smoothScan(WasteScan.fromJson(data));
         _serverError = null;
       });
     }
@@ -406,76 +510,89 @@ class _LiveCameraPageState extends State<LiveCameraPage> {
             ),
           const IgnorePointer(child: _ScreenShade()),
           SafeArea(
-            child: Column(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(12, 8, 14, 8),
-                  child: Row(
+            child: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 900),
+                child: SizedBox.expand(
+                  child: Column(
                     children: [
-                      const Icon(
-                        Icons.recycling_rounded,
-                        color: Color(0xFF75D79C),
-                      ),
-                      const SizedBox(width: 9),
-                      const Text(
-                        'BinThere',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w700,
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(12, 8, 14, 8),
+                        child: Row(
+                          children: [
+                            const Icon(
+                              Icons.recycling_rounded,
+                              color: Color(0xFF75D79C),
+                            ),
+                            const SizedBox(width: 9),
+                            const Text(
+                              'BinThere',
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                            const Spacer(),
+                            _ConnectionPill(
+                              connected: _serverError == null && _scan != null,
+                              analyzing: _analyzing,
+                            ),
+                            IconButton(
+                              onPressed: _editServerUrl,
+                              tooltip: 'Python server settings',
+                              icon: const Icon(
+                                Icons.settings_outlined,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                       const Spacer(),
-                      _ConnectionPill(
-                        connected: _serverError == null && _scan != null,
+                      _ResultPanel(
+                        scan: _scan,
+                        error: _serverError,
                         analyzing: _analyzing,
                       ),
-                      IconButton(
-                        onPressed: _editServerUrl,
-                        tooltip: 'Python server settings',
-                        icon: const Icon(
-                          Icons.settings_outlined,
-                          color: Colors.white,
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: OutlinedButton.icon(
+                                onPressed: ready
+                                    ? () => setState(() => _paused = !_paused)
+                                    : null,
+                                icon: Icon(
+                                  _paused
+                                      ? Icons.play_arrow_rounded
+                                      : Icons.pause_rounded,
+                                ),
+                                label: Text(
+                                  _paused ? 'Resume scan' : 'Pause scan',
+                                ),
+                                style: OutlinedButton.styleFrom(
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 14,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            IconButton.filledTonal(
+                              onPressed: _cameras.length > 1
+                                  ? _switchCamera
+                                  : null,
+                              tooltip: 'Switch camera or available lens',
+                              icon: const Icon(Icons.cameraswitch_rounded),
+                            ),
+                          ],
                         ),
                       ),
                     ],
                   ),
                 ),
-                const Spacer(),
-                _ResultPanel(
-                  scan: _scan,
-                  error: _serverError,
-                  analyzing: _analyzing,
-                ),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: OutlinedButton.icon(
-                          onPressed: ready
-                              ? () => setState(() => _paused = !_paused)
-                              : null,
-                          icon: Icon(
-                            _paused
-                                ? Icons.play_arrow_rounded
-                                : Icons.pause_rounded,
-                          ),
-                          label: Text(_paused ? 'Resume scan' : 'Pause scan'),
-                          style: OutlinedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 14),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      IconButton.filledTonal(
-                        onPressed: _cameras.length > 1 ? _switchCamera : null,
-                        tooltip: 'Switch camera',
-                        icon: const Icon(Icons.cameraswitch_rounded),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
+              ),
             ),
           ),
         ],
