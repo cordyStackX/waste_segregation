@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="520" viewBox="0 0 900 520">
+<rect width="100%" height="100%" fill="#ffffff"/>
+<text x="450" y="38" text-anchor="middle" font-family="sans-serif" font-size="23" font-weight="bold">Annotated waste boxes by bin (before training)</text>
+<text x="25" y="245" transform="rotate(-90 25 245)" text-anchor="middle" font-family="sans-serif" font-size="16">Valid box annotations</text>
+<line x1="90" y1="410" x2="860" y2="410" stroke="#d8dce2"/>
+<text x="78" y="415" text-anchor="end" font-family="sans-serif" font-size="13" fill="#4b5563">0</text>
+<line x1="90" y1="344" x2="860" y2="344" stroke="#d8dce2"/>
+<text x="78" y="349" text-anchor="end" font-family="sans-serif" font-size="13" fill="#4b5563">192</text>
+<line x1="90" y1="278" x2="860" y2="278" stroke="#d8dce2"/>
+<text x="78" y="283" text-anchor="end" font-family="sans-serif" font-size="13" fill="#4b5563">384</text>
+<line x1="90" y1="212" x2="860" y2="212" stroke="#d8dce2"/>
+<text x="78" y="217" text-anchor="end" font-family="sans-serif" font-size="13" fill="#4b5563">576</text>
+<line x1="90" y1="146" x2="860" y2="146" stroke="#d8dce2"/>
+<text x="78" y="151" text-anchor="end" font-family="sans-serif" font-size="13" fill="#4b5563">768</text>
+<line x1="90" y1="80" x2="860" y2="80" stroke="#d8dce2"/>
+<text x="78" y="85" text-anchor="end" font-family="sans-serif" font-size="13" fill="#4b5563">960</text>
+<rect x="154.2" y="221.3" width="128.3" height="188.7" rx="5" fill="#40dc50"/>
+<text x="218.3" y="212.3" text-anchor="middle" font-family="sans-serif" font-size="17" font-weight="bold">549</text>
+<text x="218.3" y="460" text-anchor="middle" font-family="sans-serif" font-size="14">biodegradable</text>
+<rect x="410.8" y="123.0" width="128.3" height="287.0" rx="5" fill="#ffaa1e"/>
+<text x="475.0" y="114.0" text-anchor="middle" font-family="sans-serif" font-size="17" font-weight="bold">835</text>
+<text x="475.0" y="460" text-anchor="middle" font-family="sans-serif" font-size="14">non biodegradable</text>
+<rect x="667.5" y="300.3" width="128.3" height="109.7" rx="5" fill="#2832f0"/>
+<text x="731.7" y="291.3" text-anchor="middle" font-family="sans-serif" font-size="17" font-weight="bold">319</text>
+<text x="731.7" y="460" text-anchor="middle" font-family="sans-serif" font-size="14">residual special waste</text>
+</svg>

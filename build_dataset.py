@@ -27,14 +27,16 @@ args = parser.parse_args()
 
 # Collect images that have a label
 items = []
+seen_labels = set()
 for img in sorted(SOURCE.rglob("*")):
     if not (img.is_file() and img.suffix.lower() in IMAGE_EXTENSIONS):
         continue
     if img.parent == SOURCE:
         continue
     label = ANNOTATIONS / img.relative_to(SOURCE).with_suffix(".txt")
-    if label.exists():
+    if label.exists() and label not in seen_labels:
         items.append((img, label))
+        seen_labels.add(label)
 
 if not items:
     raise SystemExit(

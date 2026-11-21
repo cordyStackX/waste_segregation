@@ -15,6 +15,7 @@ Usage: ./run.sh <command>
   camera            run Python/OpenCV camera preview with live predictions
   dataset [--replace]  build detection_dataset/ from public/ and annotations
   train [--replace]    build the detection dataset, then train YOLO
+  report               plot annotation counts without training
   test <images...>  run object detection on image files
   app               run the Flutter app, pointed at this machine
   all               server + Flutter app together (Ctrl+C stops both)
@@ -83,6 +84,10 @@ case "$cmd" in
     use_venv
     python build_dataset.py "$@"
     exec python train_detection.py
+    ;;
+  report)
+    use_venv
+    exec python dataset_report.py "$@"
     ;;
   test)
     use_venv
