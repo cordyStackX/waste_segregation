@@ -6,7 +6,7 @@ An AI-assisted waste segregation system made of three parts that work together:
 |---|---|---|
 | **Front end** | Flutter | Opens the camera, shows the live view, and draws detections |
 | **Brain** | Python + Ultralytics YOLO + Flask | Analyzes uploaded frames and returns item boxes and target bins |
-| **Controller** | C++ (Arduino) | Receives sort commands and drives the hardware (LEDs now, servos later) |
+| **Controller** | C++ (Arduino) | Receives sort commands, lights bin LEDs, and operates the biodegradable lid servo |
 
 ```
  Camera → Flutter app ── JPEG frames ──> Python + YOLO
@@ -193,6 +193,7 @@ The API listens on `0.0.0.0:5000` and loads `runs/detect/waste_detailed-4/weight
 | `GET /health` | Model name, classes, confidence, and readiness | Checking the Python service from Flutter |
 | `POST /predict` | Detection boxes and bin codes for a raw JPEG request body | Flutter uploads each captured frame here |
 | `GET /api/result` | The most recent prediction | Compatibility with older clients |
+| `GET /api/arduino/status` | Arduino connection, servo threshold, and last action | Checking the USB-connected controller |
 
 Example `/predict` response:
 
@@ -253,7 +254,7 @@ To serve a web build from Python, run `cd flutter && flutter build web -t lib/ma
 
 ## 3. Arduino controller (C++)
 
-The controller currently uses **one LED per bin** so the whole pipeline can be tested without moving parts. Servos can come later without changing the serial commands.
+The controller uses one LED per bin and a servo on the biodegradable lid. The Uno has no Wi-Fi, so Flask sends commands over USB serial after YOLO confirms a biodegradable item.
 
 ### Wiring
 
@@ -268,6 +269,14 @@ Arduino pin → 220Ω resistor → LED long leg (+) → LED short leg (−) → 
 | `biodegradable` | green | D2 |
 | `non_biodegradable` | blue | D3 |
 | `residual_special_waste` | red | D4 |
+
+### Servo wiring
+
+| Part | Connection |
+|---|---|
+| Biodegradable lid servo signal | D9 |
+| Servo power | Separate regulated 5 V supply (do not power the servo from the Uno 5 V pin) |
+| Ground | Connect the servo supply GND to Arduino GND |
 
 ### Upload
 
@@ -293,6 +302,8 @@ Text commands, one per line, at **9600 baud**.
 | Brain → Arduino | `SORT:BIO` | Green LED on for 2 seconds. Reply: `OK` |
 | Brain → Arduino | `SORT:NONBIO` | Blue LED on for 2 seconds. Reply: `OK` |
 | Brain → Arduino | `SORT:RESIDUAL` | Red LED on for 2 seconds. Reply: `OK` |
+| Brain → Arduino | `OPEN:BIO` | Move biodegradable lid servo open; it auto-closes after 1.8 seconds. Reply: `OK:OPEN:BIO` |
+| Brain → Arduino | `CLOSE:BIO` | Close the biodegradable lid. Reply: `OK:CLOSE:BIO` |
 | Arduino → Brain | `ERR:BAD_CMD` / `ERR:TOO_LONG` | Unknown or oversized command |
 
 ### Test by hand
@@ -303,23 +314,27 @@ Text commands, one per line, at **9600 baud**.
 
 Type `PING` (expect `PONG`), then `SORT:BIO`, `SORT:NONBIO`, and `SORT:RESIDUAL` and watch the LEDs. Close the monitor before running Python, because only one program can hold the port.
 
-### How the brain uses it
+### Python API and automatic servo trigger
 
-The Python brain opens the port with `pyserial` and sends the sort command after a confident prediction:
+The Arduino Uno does not make HTTP requests itself. Flutter sends each camera frame to `POST /predict`; Flask runs YOLO and sends `OPEN:BIO` to the Uno over USB serial when a biodegradable detection is at least 70% confident for three consecutive predictions. It requires eight consecutive predictions without a qualifying biodegradable detection before it can re-arm, and applies an 8-second cooldown.
 
-| Class | Command |
-|---|---|
-| `biodegradable` | `SORT:BIO` |
-| `non_biodegradable` | `SORT:NONBIO` |
-| `residual_special_waste` | `SORT:RESIDUAL` |
+Configure the serial port before starting the Python server:
 
-To avoid false triggers, send a command only when the confidence is high (for example 80% or more), the same class repeats for several predictions in a row, and a cooldown has passed since the last command. Never send a command while the label is `unsure`. The Uno resets when the serial port opens, so wait about 2 seconds after connecting.
+```bash
+WASTE_ARDUINO_PORT=/dev/ttyACM0 ./run.sh server
+```
+
+On Arch, a clone may appear as `/dev/ttyUSB0`. The Uno resets when its serial port opens, so the server waits for it to start before sending a command. The lid opens to 90 degrees and closes after 1.8 seconds; adjust `BIO_OPEN_ANGLE`, `BIO_CLOSED_ANGLE`, and `BIO_OPEN_MS` in `arduino/arduino.ino` to fit the lid mechanism.
+
+Check the controller configuration and last action with:
+
+```bash
+curl http://127.0.0.1:5000/api/arduino/status
+```
+
+Threshold and timing can be configured with `WASTE_SERVO_CONFIDENCE`, `WASTE_SERVO_CONFIRM_FRAMES`, `WASTE_SERVO_REARM_FRAMES`, and `WASTE_SERVO_COOLDOWN`.
 
 Linux usually exposes the board as `/dev/ttyACM0` (or `/dev/ttyUSB0` for clones). On Arch your user must be in the `uucp` group: `sudo usermod -aG uucp $USER`, then log out and back in.
-
-### Later: servos
-
-A servo version (a sorter servo plus a trapdoor servo) can reuse the same commands. It needs a separate 5 V supply for the servos, with a common GND to the Arduino, and the `Servo` library (`arduino-cli lib install Servo`, and add it under `libraries:` in `arduino.yml`).
 
 ---
 
@@ -377,8 +392,7 @@ Limits to know about:
 - [ ] Add images for `residual_special_waste` and balance the three classes (100+ each)
 - [ ] Retrain with more varied frames from the real camera setup
 - [ ] Test camera capture on Linux, Chrome over HTTPS, and a phone
-- [ ] Add the Python → Arduino serial sending to `iframe_embeded.py`, with confidence, repeat, and cooldown checks
-- [ ] Replace the LEDs with servos (sorter plus trapdoor)
+- [x] Add confidence-gated biodegradable lid servo control through Python → Arduino USB serial
 - [ ] Add a presence sensor so the controller only sorts when an item is there
 - [ ] Add a low-confidence rejection path in the hardware (send the item to a "check manually" bin)
 

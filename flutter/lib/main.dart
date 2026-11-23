@@ -3,10 +3,10 @@ import 'dart:convert';
 
 import 'package:camera/camera.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:image/image.dart' as img;
+import 'package:material_ui/material_ui.dart';
 
 import 'capture_file_cleanup_stub.dart'
     if (dart.library.io) 'capture_file_cleanup_io.dart';

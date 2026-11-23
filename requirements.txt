@@ -4,6 +4,7 @@ ultralytics
 # Python prediction API
 Flask
 flask-cors
+pyserial
 
 # Camera capture and annotation UI
 opencv-python

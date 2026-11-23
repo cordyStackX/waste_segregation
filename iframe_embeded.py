@@ -1,8 +1,10 @@
 """Python inference API for the Flutter waste camera."""
 
+import json
 import os
 import socket
 import threading
+import time
 from pathlib import Path
 
 import cv2
@@ -10,8 +12,6 @@ import numpy as np
 from flask import Flask, jsonify, request, send_from_directory
 from flask_cors import CORS
 from ultralytics import YOLO
-
-import json
 
 # Written by build_dataset.py: detailed class name -> bin
 BIN_BY_CLASS = json.loads(
@@ -25,6 +25,12 @@ MODEL_PATH = Path(os.getenv(
 DEVICE = os.getenv("DEVICE", "0")
 CONFIDENCE = float(os.getenv("WASTE_CONFIDENCE", "0.30"))
 IMAGE_SIZE = int(os.getenv("WASTE_IMAGE_SIZE", "640"))
+ARDUINO_PORT = os.getenv("WASTE_ARDUINO_PORT")
+ARDUINO_BAUD = int(os.getenv("WASTE_ARDUINO_BAUD", "9600"))
+SERVO_CONFIDENCE = float(os.getenv("WASTE_SERVO_CONFIDENCE", "0.70"))
+SERVO_CONFIRM_FRAMES = int(os.getenv("WASTE_SERVO_CONFIRM_FRAMES", "3"))
+SERVO_REARM_FRAMES = int(os.getenv("WASTE_SERVO_REARM_FRAMES", "8"))
+SERVO_COOLDOWN_SECONDS = float(os.getenv("WASTE_SERVO_COOLDOWN", "8"))
 PORT = int(os.getenv("WASTE_PORT", os.getenv("PORT", "5000")))
 SSL_CERT = os.getenv("SSL_CERT")  # optional: real cert (e.g. from mkcert)
 SSL_KEY = os.getenv("SSL_KEY")
@@ -42,8 +48,113 @@ app = Flask(__name__)
 CORS(app)
 model = YOLO(str(MODEL_PATH))
 model_lock = threading.Lock()  # Flask is threaded; keep inference one-at-a-time
+arduino_lock = threading.Lock()
+trigger_lock = threading.Lock()
+arduino_serial = None
+arduino_status = {
+    "connected": False,
+    "pending": False,
+    "last_action": None,
+    "last_error": None,
+}
+bio_confirmations = 0
+bio_clear_frames = 0
+bio_latched = False
+last_servo_attempt = 0.0
 
 state = {"label": "unsure", "conf": 0.0, "bin": None, "detections": []}
+
+
+def send_arduino_command(command):
+    """Send one newline-terminated command to the USB-connected Uno."""
+    global arduino_serial
+    if not ARDUINO_PORT:
+        arduino_status.update(
+            pending=False,
+            last_error="WASTE_ARDUINO_PORT is not configured",
+        )
+        return False
+
+    arduino_status["pending"] = True
+    try:
+        import serial
+
+        with arduino_lock:
+            if arduino_serial is None or not arduino_serial.is_open:
+                arduino_serial = serial.Serial(
+                    ARDUINO_PORT,
+                    ARDUINO_BAUD,
+                    timeout=0.25,
+                    write_timeout=1,
+                )
+                # Opening a USB serial port resets many Uno-compatible boards.
+                time.sleep(2)
+                arduino_serial.reset_input_buffer()
+
+            arduino_serial.write(f"{command}\n".encode("ascii"))
+            arduino_serial.flush()
+            deadline = time.monotonic() + 2
+            while time.monotonic() < deadline:
+                reply = arduino_serial.readline().decode("ascii", errors="ignore").strip()
+                if reply == "OK:OPEN:BIO":
+                    arduino_status.update(
+                        connected=True,
+                        pending=False,
+                        last_action="OPEN:BIO",
+                        last_error=None,
+                    )
+                    return True
+                if reply.startswith("ERR:"):
+                    raise RuntimeError(f"Arduino replied {reply}")
+            raise TimeoutError("Arduino did not acknowledge OPEN:BIO")
+    except Exception as error:
+        if arduino_serial is not None:
+            try:
+                arduino_serial.close()
+            except Exception:
+                pass
+            arduino_serial = None
+        arduino_status.update(
+            connected=False,
+            pending=False,
+            last_error=str(error),
+        )
+        return False
+
+
+def maybe_open_bio_servo(detections):
+    """Trigger only after stable high-confidence biodegradable detections."""
+    global bio_confirmations, bio_clear_frames, bio_latched, last_servo_attempt
+    bio_confidence = max(
+        (item["conf"] for item in detections if item["bin"] == "biodegradable"),
+        default=0.0,
+    )
+    now = time.monotonic()
+
+    with trigger_lock:
+        if bio_confidence >= SERVO_CONFIDENCE:
+            bio_confirmations += 1
+            bio_clear_frames = 0
+        else:
+            bio_confirmations = 0
+            bio_clear_frames += 1
+            if bio_clear_frames >= SERVO_REARM_FRAMES:
+                bio_latched = False
+
+        if (
+            bio_confirmations < SERVO_CONFIRM_FRAMES
+            or bio_latched
+            or now - last_servo_attempt < SERVO_COOLDOWN_SECONDS
+        ):
+            return
+
+        last_servo_attempt = now
+        bio_latched = True
+        threading.Thread(
+            target=send_arduino_command,
+            args=("OPEN:BIO",),
+            daemon=True,
+        ).start()
 
 
 def read_detections(result):
@@ -86,6 +197,7 @@ def predict():
         )[0]
 
     detections = read_detections(result)
+    maybe_open_bio_servo(detections)
     top = detections[0] if detections else None
     state.update(
         label=top["label"] if top else "unsure",
@@ -102,6 +214,19 @@ def api_result():
     return jsonify(state)
 
 
+@app.route("/api/arduino/status")
+def api_arduino_status():
+    return jsonify({
+        **arduino_status,
+        "configured": bool(ARDUINO_PORT),
+        "port": ARDUINO_PORT,
+        "servo_threshold": SERVO_CONFIDENCE,
+        "confirm_frames": SERVO_CONFIRM_FRAMES,
+        "rearm_frames": SERVO_REARM_FRAMES,
+        "cooldown_seconds": SERVO_COOLDOWN_SECONDS,
+    })
+
+
 @app.route("/")
 def index():
     return jsonify({
@@ -110,6 +235,7 @@ def index():
         "analysis": "Python / YOLO",
         "health": "/health",
         "predict": "/predict",
+        "arduino_status": "/api/arduino/status",
         "flutter_web": "/app/",
     })
 
