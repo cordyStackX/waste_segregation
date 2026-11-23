@@ -31,6 +31,11 @@ SERVO_CONFIDENCE = float(os.getenv("WASTE_SERVO_CONFIDENCE", "0.70"))
 SERVO_CONFIRM_FRAMES = int(os.getenv("WASTE_SERVO_CONFIRM_FRAMES", "3"))
 SERVO_REARM_FRAMES = int(os.getenv("WASTE_SERVO_REARM_FRAMES", "8"))
 SERVO_COOLDOWN_SECONDS = float(os.getenv("WASTE_SERVO_COOLDOWN", "8"))
+SERVO_COMMAND_BY_BIN = {
+    "biodegradable": "BIO",
+    "non_biodegradable": "NONBIO",
+    "residual_special_waste": "RESIDUAL",
+}
 PORT = int(os.getenv("WASTE_PORT", os.getenv("PORT", "5000")))
 SSL_CERT = os.getenv("SSL_CERT")  # optional: real cert (e.g. from mkcert)
 SSL_KEY = os.getenv("SSL_KEY")
@@ -57,10 +62,15 @@ arduino_status = {
     "last_action": None,
     "last_error": None,
 }
-bio_confirmations = 0
-bio_clear_frames = 0
-bio_latched = False
-last_servo_attempt = 0.0
+servo_triggers = {
+    bin_name: {
+        "confirmations": 0,
+        "clear_frames": 0,
+        "latched": False,
+        "last_attempt": 0.0,
+    }
+    for bin_name in SERVO_COMMAND_BY_BIN
+}
 
 state = {"label": "unsure", "conf": 0.0, "bin": None, "detections": []}
 
@@ -96,17 +106,17 @@ def send_arduino_command(command):
             deadline = time.monotonic() + 2
             while time.monotonic() < deadline:
                 reply = arduino_serial.readline().decode("ascii", errors="ignore").strip()
-                if reply == "OK:OPEN:BIO":
+                if reply == f"OK:{command}":
                     arduino_status.update(
                         connected=True,
                         pending=False,
-                        last_action="OPEN:BIO",
+                        last_action=command,
                         last_error=None,
                     )
                     return True
                 if reply.startswith("ERR:"):
                     raise RuntimeError(f"Arduino replied {reply}")
-            raise TimeoutError("Arduino did not acknowledge OPEN:BIO")
+            raise TimeoutError(f"Arduino did not acknowledge {command}")
     except Exception as error:
         if arduino_serial is not None:
             try:
@@ -122,37 +132,43 @@ def send_arduino_command(command):
         return False
 
 
-def maybe_open_bio_servo(detections):
-    """Trigger only after stable high-confidence biodegradable detections."""
-    global bio_confirmations, bio_clear_frames, bio_latched, last_servo_attempt
-    bio_confidence = max(
-        (item["conf"] for item in detections if item["bin"] == "biodegradable"),
-        default=0.0,
-    )
+def maybe_open_servo(detections):
+    """Trigger each lid only after stable, high-confidence bin detections."""
     now = time.monotonic()
+    detected_confidence = {
+        bin_name: max(
+            (item["conf"] for item in detections if item["bin"] == bin_name),
+            default=0.0,
+        )
+        for bin_name in SERVO_COMMAND_BY_BIN
+    }
+    commands_to_send = []
 
     with trigger_lock:
-        if bio_confidence >= SERVO_CONFIDENCE:
-            bio_confirmations += 1
-            bio_clear_frames = 0
-        else:
-            bio_confirmations = 0
-            bio_clear_frames += 1
-            if bio_clear_frames >= SERVO_REARM_FRAMES:
-                bio_latched = False
+        for bin_name, command in SERVO_COMMAND_BY_BIN.items():
+            trigger = servo_triggers[bin_name]
+            if detected_confidence[bin_name] >= SERVO_CONFIDENCE:
+                trigger["confirmations"] += 1
+                trigger["clear_frames"] = 0
+            else:
+                trigger["confirmations"] = 0
+                trigger["clear_frames"] += 1
+                if trigger["clear_frames"] >= SERVO_REARM_FRAMES:
+                    trigger["latched"] = False
 
-        if (
-            bio_confirmations < SERVO_CONFIRM_FRAMES
-            or bio_latched
-            or now - last_servo_attempt < SERVO_COOLDOWN_SECONDS
-        ):
-            return
+            if (
+                trigger["confirmations"] >= SERVO_CONFIRM_FRAMES
+                and not trigger["latched"]
+                and now - trigger["last_attempt"] >= SERVO_COOLDOWN_SECONDS
+            ):
+                trigger["last_attempt"] = now
+                trigger["latched"] = True
+                commands_to_send.append(f"OPEN:{command}")
 
-        last_servo_attempt = now
-        bio_latched = True
+    for command in commands_to_send:
         threading.Thread(
             target=send_arduino_command,
-            args=("OPEN:BIO",),
+            args=(command,),
             daemon=True,
         ).start()
 
@@ -197,7 +213,7 @@ def predict():
         )[0]
 
     detections = read_detections(result)
-    maybe_open_bio_servo(detections)
+    maybe_open_servo(detections)
     top = detections[0] if detections else None
     state.update(
         label=top["label"] if top else "unsure",
@@ -224,6 +240,13 @@ def api_arduino_status():
         "confirm_frames": SERVO_CONFIRM_FRAMES,
         "rearm_frames": SERVO_REARM_FRAMES,
         "cooldown_seconds": SERVO_COOLDOWN_SECONDS,
+        "bins": {
+            bin_name: {
+                "command": f"OPEN:{command}",
+                "latched": servo_triggers[bin_name]["latched"],
+            }
+            for bin_name, command in SERVO_COMMAND_BY_BIN.items()
+        },
     })
 
 
