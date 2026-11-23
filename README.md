@@ -6,7 +6,7 @@ An AI-assisted waste segregation system made of three parts that work together:
 |---|---|---|
 | **Front end** | Flutter | Opens the camera, shows the live view, and draws detections |
 | **Brain** | Python + Ultralytics YOLO + Flask | Analyzes uploaded frames and returns item boxes and target bins |
-| **Controller** | C++ (Arduino) | Receives sort commands, lights bin LEDs, and operates the biodegradable lid servo |
+| **Controller** | C++ (Arduino) | Receives commands and operates the biodegradable-bin lid servo |
 
 ```
  Camera → Flutter app ── JPEG frames ──> Python + YOLO
@@ -254,29 +254,15 @@ To serve a web build from Python, run `cd flutter && flutter build web -t lib/ma
 
 ## 3. Arduino controller (C++)
 
-The controller uses one LED per bin and a servo on the biodegradable lid. The Uno has no Wi-Fi, so Flask sends commands over USB serial after YOLO confirms a biodegradable item.
+The controller uses an SG90 servo on the biodegradable bin lid. The Uno has no Wi-Fi, so Flask sends commands over USB serial after YOLO confirms a biodegradable item.
 
 ### Wiring
 
-Wire each LED the same way:
-
-```
-Arduino pin → 220Ω resistor → LED long leg (+) → LED short leg (−) → GND
-```
-
-| Bin | LED | Pin |
-|---|---|---|
-| `biodegradable` | green | D2 |
-| `non_biodegradable` | blue | D3 |
-| `residual_special_waste` | red | D4 |
-
-### Servo wiring
-
 | Part | Connection |
 |---|---|
-| Biodegradable lid servo signal | D9 |
-| Servo power | Separate regulated 5 V supply (do not power the servo from the Uno 5 V pin) |
-| Ground | Connect the servo supply GND to Arduino GND |
+| SG90 signal (orange/yellow) | Arduino D9 |
+| SG90 power (red) | Separate regulated 5 V supply; do not use the Uno 5 V pin |
+| SG90 ground (brown/black) | Supply GND and Arduino GND connected together |
 
 ### Upload
 
@@ -295,13 +281,10 @@ Text commands, one per line, at **9600 baud**.
 
 | Direction | Message | Meaning |
 |---|---|---|
-| Arduino → Brain | `READY` | Sent at power-on, after a quick LED self-test |
+| Arduino → Brain | `READY` | Sent at power-on |
 | Brain → Arduino | `PING` | Connection check. Reply: `PONG` |
-| Brain → Arduino | `TEST` | Blink every LED once. Reply: `OK` |
-| Brain → Arduino | `OFF` | All LEDs off. Reply: `OK` |
-| Brain → Arduino | `SORT:BIO` | Green LED on for 2 seconds. Reply: `OK` |
-| Brain → Arduino | `SORT:NONBIO` | Blue LED on for 2 seconds. Reply: `OK` |
-| Brain → Arduino | `SORT:RESIDUAL` | Red LED on for 2 seconds. Reply: `OK` |
+| Brain → Arduino | `TEST` | Open the lid; it auto-closes. Reply: `OK:OPEN:BIO` |
+| Brain → Arduino | `OFF` / `CLOSE:BIO` | Close the lid. Reply: `OK:CLOSE:BIO` |
 | Brain → Arduino | `OPEN:BIO` | Move biodegradable lid servo open; it auto-closes after 1.8 seconds. Reply: `OK:OPEN:BIO` |
 | Brain → Arduino | `CLOSE:BIO` | Close the biodegradable lid. Reply: `OK:CLOSE:BIO` |
 | Arduino → Brain | `ERR:BAD_CMD` / `ERR:TOO_LONG` | Unknown or oversized command |
@@ -312,7 +295,7 @@ Text commands, one per line, at **9600 baud**.
 ./run.sh arduino monitor
 ```
 
-Type `PING` (expect `PONG`), then `SORT:BIO`, `SORT:NONBIO`, and `SORT:RESIDUAL` and watch the LEDs. Close the monitor before running Python, because only one program can hold the port.
+Type `PING` (expect `PONG`), then `TEST` to exercise the lid. Close the monitor before running Python, because only one program can hold the port.
 
 ### Python API and automatic servo trigger
 
@@ -379,7 +362,7 @@ Limits to know about:
 | `Can't open sketch: no such file or directory` | Run the compile from the repo root with `arduino`, or from inside `arduino/` with `.` |
 | `arduino-cli board list` says `No boards found` | No board connected, or a charge-only USB cable. Use a data cable and check `ls /dev/ttyACM* /dev/ttyUSB*` |
 | `Permission denied: /dev/ttyUSB0` (or `ttyACM0`) | Add your user to the `uucp` group on Arch and log in again |
-| `Servo.h: No such file or directory` (servo version only) | `arduino-cli lib install Servo`, and add `Servo` under `libraries:` in `arduino.yml` |
+| `Servo.h: No such file or directory` | Install the Servo library with `arduino-cli lib install Servo` |
 | Predictions are inaccurate on the live camera | Not enough data from your own camera. Capture more varied frames and retrain |
 
 ---
@@ -387,7 +370,7 @@ Limits to know about:
 ## Roadmap
 
 - [x] Flutter camera with Python YOLO frame analysis (`POST /predict`)
-- [x] Arduino LED controller with a serial protocol
+- [x] Arduino SG90 controller with a serial protocol
 - [x] CI/CD workflows and `setup.sh` / `run.sh`
 - [ ] Add images for `residual_special_waste` and balance the three classes (100+ each)
 - [ ] Retrain with more varied frames from the real camera setup
