@@ -52,7 +52,7 @@ chmod +x setup.sh run.sh
 | `./run.sh arduino upload` | Compile and upload (auto-detects the port) |
 | `./run.sh arduino monitor` | Serial monitor at 9600 baud |
 
-Overrides go before the command, for example `DEVICE=chrome ./run.sh app`, `PORT=/dev/ttyUSB0 ./run.sh arduino upload`, or `WASTE_ARDUINO_PORT=/dev/ttyUSB0 ./run.sh all`. The Arduino firmware must already be uploaded; `all` checks the board with `PING` but does not flash it. Run `./run.sh help` for the full list.
+Overrides go before the command, for example `DEVICE=chrome ./run.sh app`, `BRAIN_URL=http://127.0.0.1:5000 ./run.sh app`, `PORT=/dev/ttyUSB0 ./run.sh arduino upload`, or `WASTE_ARDUINO_PORT=/dev/ttyUSB0 ./run.sh all`. The Arduino firmware must already be uploaded; `all` checks the board with `PING` but does not flash it. Run `./run.sh help` for the full list.
 
 ---
 
@@ -246,7 +246,7 @@ Or start each process separately:
 ./run.sh app
 ```
 
-The default detector address is filled in by `run.sh`. For a phone, connect both devices to the same Wi-Fi and run Flutter with the computer's LAN address, for example `--dart-define=BRAIN_URL=http://192.168.1.20:5000`. The Android manifest permits cleartext HTTP for local development.
+The default detector address is filled in by `run.sh`, the API uses HTTP by default, and inference automatically selects CUDA when available or CPU otherwise. Override the inference device with `WASTE_DEVICE` (for example, `WASTE_DEVICE=cpu ./run.sh server`). For a USB-connected Android phone, enable USB debugging, confirm its ID with `flutter devices`, run `adb reverse tcp:5000 tcp:5000`, then launch with `DEVICE=<phone-id> BRAIN_URL=http://127.0.0.1:5000 ./run.sh app`. The reverse forwards the phone's localhost API requests to the computer without opening the API to the Wi-Fi network. For Wi-Fi instead, connect both devices to the same network and use the computer's reachable LAN address, for example `BRAIN_URL=http://192.168.1.20:5000`; allow port 5000 through the firewall if needed. The Android manifest permits cleartext HTTP for local development. Set `HTTPS=1` when starting `./run.sh server` only when HTTPS is needed.
 
 To serve a web build from Python, run `cd flutter && flutter build web -t lib/main_web.dart --base-href /app/`, then open `/app/` from the same computer. Browsers require HTTPS for camera access on non-localhost network addresses.
 

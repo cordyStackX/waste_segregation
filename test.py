@@ -5,6 +5,7 @@ import os
 import sys
 from pathlib import Path
 
+import torch
 from ultralytics import YOLO
 
 
@@ -14,7 +15,9 @@ MODEL_PATH = Path(
         "runs/detect/waste_detailed-4/weights/best.pt",
     )
 )
-DEVICE = os.getenv("DEVICE", "0")
+DEVICE = os.getenv("WASTE_DEVICE")
+if DEVICE is None:
+    DEVICE = "0" if torch.cuda.is_available() else "cpu"
 CONFIDENCE = float(os.getenv("WASTE_CONFIDENCE", "0.35"))
 IMAGE_SIZE = int(os.getenv("WASTE_IMAGE_SIZE", "640"))
 BIN_BY_CLASS = json.loads(Path("bin_by_class.json").read_text())

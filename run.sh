@@ -4,6 +4,7 @@ set -euo pipefail
 cd "$(dirname "${BASH_SOURCE[0]}")"
 
 SERVER_PORT="${SERVER_PORT:-5000}"
+HTTPS="${HTTPS:-0}"
 FQBN="${FQBN:-arduino:avr:uno}"   # change for other boards
 DEVICE="${DEVICE:-linux}"         # Flutter device: linux, chrome, or a phone id
 
@@ -28,7 +29,10 @@ Environment overrides:
   PORT=/dev/ttyACM0   Arduino serial port
   FQBN=arduino:avr:uno   Arduino board
   DEVICE=chrome       Flutter device
+  BRAIN_URL=http://127.0.0.1:5000   Flutter API URL
   SERVER_PORT=5000    Python analysis API port
+  WASTE_DEVICE=cpu    YOLO inference device (auto-selects CUDA or CPU by default)
+  HTTPS=1             enable HTTPS for the Python API
   WASTE_ARDUINO_PORT=/dev/ttyUSB0   Arduino port for `all`
 USAGE
 }
@@ -46,6 +50,14 @@ host_ip() {
   local addr
   addr="$(ip route get 1.1.1.1 2>/dev/null | awk '{for (i = 1; i <= NF; i++) if ($i == "src") { print $(i + 1); exit }}' || true)"
   echo "${addr:-localhost}"
+}
+
+brain_url() {
+  if [[ -n "${BRAIN_URL:-}" ]]; then
+    printf '%s' "$BRAIN_URL"
+  else
+    printf 'http://%s:%s' "$(host_ip)" "$SERVER_PORT"
+  fi
 }
 
 find_port() {
@@ -70,8 +82,13 @@ if [[ $# -gt 0 ]]; then shift; fi
 case "$cmd" in
   server)
     use_venv
-    echo "Python analysis API: http://$(host_ip):${SERVER_PORT}"
-    exec HTTPS=1 SSL_CERT=/tmp/binthere-cert.pem SSL_KEY=/tmp/binthere-key.pem python iframe_embeded.py
+    scheme=http
+    if [[ "$HTTPS" != "0" ]]; then
+      scheme=https
+    fi
+    echo "Python analysis API: ${scheme}://$(host_ip):${SERVER_PORT}"
+    exec env HTTPS="$HTTPS" SSL_CERT="${SSL_CERT:-/tmp/binthere-cert.pem}" \
+      SSL_KEY="${SSL_KEY:-/tmp/binthere-key.pem}" WASTE_PORT="$SERVER_PORT" python iframe_embeded.py
     ;;
   camera)
     use_venv
@@ -97,7 +114,7 @@ case "$cmd" in
   app)
     cd flutter
     exec env GIT_CONFIG_COUNT=1 GIT_CONFIG_KEY_0=safe.directory GIT_CONFIG_VALUE_0=/opt/flutter \
-      flutter run -d "$DEVICE" --dart-define=BRAIN_URL="http://$(host_ip):${SERVER_PORT}" "$@"
+      flutter run -d "$DEVICE" --dart-define=BRAIN_URL="$(brain_url)" "$@"
     ;;
   all)
     use_venv
@@ -138,7 +155,7 @@ PY
     sleep 3
     cd flutter
     env GIT_CONFIG_COUNT=1 GIT_CONFIG_KEY_0=safe.directory GIT_CONFIG_VALUE_0=/opt/flutter \
-      flutter run -d "$DEVICE" --dart-define=BRAIN_URL="http://$(host_ip):${SERVER_PORT}"
+      flutter run -d "$DEVICE" --dart-define=BRAIN_URL="$(brain_url)"
     ;;
   arduino)
     sub="${1:-upload}"

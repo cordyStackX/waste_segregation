@@ -201,9 +201,7 @@ class _LiveCameraPageState extends State<LiveCameraPage> {
     return union > 0 ? intersection / union : 0;
   }
 
-  BoxFit _cameraFit(Size size) => size.width < 600 && size.height > size.width
-      ? BoxFit.cover
-      : BoxFit.contain;
+  static const BoxFit _cameraFit = BoxFit.contain;
 
   bool _isUltraWideBackCamera(CameraDescription camera) {
     if (camera.lensDirection != CameraLensDirection.back) return false;
@@ -510,10 +508,7 @@ class _LiveCameraPageState extends State<LiveCameraPage> {
             Positioned.fill(
               child: IgnorePointer(
                 child: CustomPaint(
-                  painter: _DetectionPainter(
-                    _scan!,
-                    fit: _cameraFit(MediaQuery.sizeOf(context)),
-                  ),
+                  painter: _DetectionPainter(_scan!, fit: _cameraFit),
                 ),
               ),
             ),
@@ -614,15 +609,19 @@ class _LiveCameraPageState extends State<LiveCameraPage> {
       builder: (context, constraints) {
         final size = Size(constraints.maxWidth, constraints.maxHeight);
         final aspectRatio = controller.value.aspectRatio;
+        final previewAspectRatio =
+            MediaQuery.orientationOf(context) == Orientation.portrait
+            ? 1 / aspectRatio
+            : aspectRatio;
         final preview = SizedBox(
           width: size.width,
-          height: size.width / aspectRatio,
+          height: size.width / previewAspectRatio,
           child: CameraPreview(controller),
         );
         return ClipRect(
           child: SizedBox.expand(
             child: FittedBox(
-              fit: _cameraFit(size),
+              fit: _cameraFit,
               alignment: Alignment.center,
               child: preview,
             ),

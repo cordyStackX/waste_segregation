@@ -9,6 +9,7 @@ from pathlib import Path
 
 import cv2
 import numpy as np
+import torch
 from flask import Flask, jsonify, request, send_from_directory
 from flask_cors import CORS
 from ultralytics import YOLO
@@ -22,7 +23,9 @@ MODEL_PATH = Path(os.getenv(
     "WASTE_DETECTION_MODEL",
     "runs/detect/waste_detailed-8/weights/best.pt",
 ))
-DEVICE = os.getenv("DEVICE", "0")
+DEVICE = os.getenv("WASTE_DEVICE")
+if DEVICE is None:
+    DEVICE = "0" if torch.cuda.is_available() else "cpu"
 CONFIDENCE = float(os.getenv("WASTE_CONFIDENCE", "0.50"))
 IMAGE_SIZE = int(os.getenv("WASTE_IMAGE_SIZE", "640"))
 ARDUINO_PORT = os.getenv("WASTE_ARDUINO_PORT")
