@@ -35,7 +35,7 @@ Tested on Arch Linux. Run the setup once, then use `run.sh` for everything else.
 ```bash
 chmod +x setup.sh run.sh
 ./setup.sh              # virtual env, PyTorch, packages, Arduino core, Flutter deps
-./run.sh all            # start the Flutter camera app + Python analysis API
+./run.sh all            # start Flutter + Python, connected to the detected Arduino
 ```
 
 | Command | What it does |
@@ -47,12 +47,12 @@ chmod +x setup.sh run.sh
 | `./run.sh train` | Build the detection dataset, then train YOLO |
 | `./run.sh test photo.jpg` | Detect waste items in image files |
 | `./run.sh app` | Run the Flutter app, pointed at this machine |
-| `./run.sh all` | Server and Flutter app together (Ctrl+C stops both) |
+| `./run.sh all` | Server, Flutter, and detected Arduino together (Ctrl+C stops both) |
 | `./run.sh arduino compile` | Compile the sketch |
 | `./run.sh arduino upload` | Compile and upload (auto-detects the port) |
 | `./run.sh arduino monitor` | Serial monitor at 9600 baud |
 
-Overrides go before the command, for example `DEVICE=chrome ./run.sh app` or `PORT=/dev/ttyUSB0 ./run.sh arduino upload`. Run `./run.sh help` for the full list.
+Overrides go before the command, for example `DEVICE=chrome ./run.sh app`, `PORT=/dev/ttyUSB0 ./run.sh arduino upload`, or `WASTE_ARDUINO_PORT=/dev/ttyUSB0 ./run.sh all`. The Arduino firmware must already be uploaded; `all` checks the board with `PING` but does not flash it. Run `./run.sh help` for the full list.
 
 ---
 
@@ -236,7 +236,7 @@ Make sure the current user can access the camera device, usually `/dev/video0`. 
 ### Run the app and detector
 
 ```bash
-./run.sh all       # starts the Python API and Flutter Linux app
+./run.sh all       # starts the Python API, Flutter app, and links the detected Arduino
 ```
 
 Or start each process separately:

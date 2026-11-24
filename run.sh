@@ -18,7 +18,7 @@ Usage: ./run.sh <command>
   report               plot annotation counts without training
   test <images...>  run object detection on image files
   app               run the Flutter app, pointed at this machine
-  all               server + Flutter app together (Ctrl+C stops both)
+  all               PING Arduino, then start server + Flutter (Ctrl+C stops both)
   arduino compile   compile the sketch
   arduino upload    compile and upload (auto-detects the port)
   arduino monitor   serial monitor at 9600 baud
@@ -29,6 +29,7 @@ Environment overrides:
   FQBN=arduino:avr:uno   Arduino board
   DEVICE=chrome       Flutter device
   SERVER_PORT=5000    Python analysis API port
+  WASTE_ARDUINO_PORT=/dev/ttyUSB0   Arduino port for `all`
 USAGE
 }
 
@@ -59,7 +60,7 @@ find_port() {
       return 0
     fi
   done
-  echo "No Arduino found. Plug it in (data cable) or set PORT=/dev/ttyACM0" >&2
+  echo "No Arduino serial port found. Check 'arduino-cli board list'; use PORT=<device> for Arduino commands or WASTE_ARDUINO_PORT=<device> with 'all'." >&2
   return 1
 }
 
@@ -95,16 +96,49 @@ case "$cmd" in
     ;;
   app)
     cd flutter
-    exec flutter run -d "$DEVICE" --dart-define=BRAIN_URL="http://$(host_ip):${SERVER_PORT}" "$@"
+    exec env GIT_CONFIG_COUNT=1 GIT_CONFIG_KEY_0=safe.directory GIT_CONFIG_VALUE_0=/opt/flutter \
+      flutter run -d "$DEVICE" --dart-define=BRAIN_URL="http://$(host_ip):${SERVER_PORT}" "$@"
     ;;
   all)
     use_venv
-    env WASTE_PORT="$SERVER_PORT" python iframe_embeded.py &
+    arduino_port="${WASTE_ARDUINO_PORT:-${PORT:-}}"
+    if [[ -z "$arduino_port" ]]; then
+      arduino_port="$(find_port)"
+    fi
+    if ! python -c 'import serial' >/dev/null 2>&1; then
+      echo "pyserial is missing from .venv. Run ./setup.sh or .venv/bin/pip install pyserial." >&2
+      exit 1
+    fi
+    python - "$arduino_port" <<'PY'
+import sys
+import time
+
+import serial
+
+port = serial.Serial(sys.argv[1], 9600, timeout=0.25, write_timeout=1)
+try:
+    # Opening an Uno serial port resets it; wait for its setup() to finish.
+    time.sleep(2)
+    port.reset_input_buffer()
+    port.write(b"PING\n")
+    deadline = time.monotonic() + 3
+    while time.monotonic() < deadline:
+        if port.readline().decode("ascii", errors="ignore").strip() == "PONG":
+            print(f"Arduino response: PONG ({sys.argv[1]})")
+            break
+    else:
+        raise SystemExit(f"Arduino at {sys.argv[1]} did not reply to PING")
+finally:
+    port.close()
+PY
+    echo "Using Arduino at $arduino_port"
+    env WASTE_PORT="$SERVER_PORT" WASTE_ARDUINO_PORT="$arduino_port" python iframe_embeded.py &
     server_pid=$!
     trap 'kill "$server_pid" 2>/dev/null || true' EXIT INT TERM
     sleep 3
     cd flutter
-    flutter run -d "$DEVICE" --dart-define=BRAIN_URL="http://$(host_ip):${SERVER_PORT}"
+    env GIT_CONFIG_COUNT=1 GIT_CONFIG_KEY_0=safe.directory GIT_CONFIG_VALUE_0=/opt/flutter \
+      flutter run -d "$DEVICE" --dart-define=BRAIN_URL="http://$(host_ip):${SERVER_PORT}"
     ;;
   arduino)
     sub="${1:-upload}"

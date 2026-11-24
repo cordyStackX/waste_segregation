@@ -23,7 +23,7 @@ MODEL_PATH = Path(os.getenv(
     "runs/detect/waste_detailed-8/weights/best.pt",
 ))
 DEVICE = os.getenv("DEVICE", "0")
-CONFIDENCE = float(os.getenv("WASTE_CONFIDENCE", "0.30"))
+CONFIDENCE = float(os.getenv("WASTE_CONFIDENCE", "0.50"))
 IMAGE_SIZE = int(os.getenv("WASTE_IMAGE_SIZE", "640"))
 ARDUINO_PORT = os.getenv("WASTE_ARDUINO_PORT")
 ARDUINO_BAUD = int(os.getenv("WASTE_ARDUINO_BAUD", "9600"))
